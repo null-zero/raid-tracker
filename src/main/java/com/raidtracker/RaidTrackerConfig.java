@@ -87,6 +87,15 @@ public interface RaidTrackerConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showPointsDry",
+		name = "Show Points Dry",
+		description = "Disable this checkmark to hide the Points Dry Panel in the ui"
+	)
+	default boolean showPointsDry()
+	{
+		return true;
+	}
+	@ConfigItem(
 			keyName = "showTimeSplits",
 			name = "Show Time Splits",
 			description = "Disable this checkmark to hide the Time Splits Panel in the ui"

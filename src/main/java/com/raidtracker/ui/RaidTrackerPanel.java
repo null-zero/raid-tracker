@@ -131,6 +131,7 @@ public class RaidTrackerPanel extends PluginPanel {
         JPanel killsLoggedPanel = getKillsLoggedPanel();
         JPanel uniquesPanel = getUniquesPanel();
         JPanel pointsPanel = getPointsPanel();
+		JPanel pointsDryPanel = getPointsDryPanel();
         JPanel splitsEarnedPanel = getSplitsEarnedPanel();
         JPanel changePurples = getChangePurples();
         JPanel mvpPanel = getMvpPanel();
@@ -166,9 +167,15 @@ public class RaidTrackerPanel extends PluginPanel {
                     panel.add(mvpPanel);
                     panel.add(Box.createRigidArea(new Dimension(0, 5)));
                 }
-                else if (config.showPoints()){
-                    panel.add(pointsPanel);
-                    panel.add(Box.createRigidArea(new Dimension(0, 5)));
+                else {
+					if (config.showPoints()) {
+						panel.add(pointsPanel);
+						panel.add(Box.createRigidArea(new Dimension(0, 5)));
+					}
+					if (config.showPointsDry()) {
+						panel.add(pointsDryPanel);
+						panel.add(Box.createRigidArea(new Dimension(0, 5)));
+					}
                 }
 
                 if (config.showSplitGPEarned()) {
@@ -219,10 +226,16 @@ public class RaidTrackerPanel extends PluginPanel {
             panel.add(mvpPanel);
             panel.add(Box.createRigidArea(new Dimension(0, 5)));
         }
-        else if (config.showPoints()){
-            panel.add(pointsPanel);
-            panel.add(Box.createRigidArea(new Dimension(0, 5)));
-        }
+        else {
+			if (config.showPoints()) {
+				panel.add(pointsPanel);
+				panel.add(Box.createRigidArea(new Dimension(0, 5)));
+			}
+			if (config.showPointsDry()) {
+				panel.add(pointsDryPanel);
+				panel.add(Box.createRigidArea(new Dimension(0, 5)));
+			}
+		}
 
         if (config.showSplitGPEarned()) {
             panel.add(splitsEarnedPanel);
@@ -506,6 +519,49 @@ public class RaidTrackerPanel extends PluginPanel {
 
         return points;
     }
+
+	private JPanel getPointsDryPanel() {
+		final JPanel pointsDry = new JPanel();
+		pointsDry.setLayout(new GridLayout(0,2));
+		pointsDry.setBorder(new EmptyBorder(3, 3, 3, 3));
+		pointsDry.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+
+		JLabel personalTitle = textPanel("Personal Points Dry");
+		JLabel totalTitle = textPanel("Total Points Dry");
+
+		pointsDry.add(personalTitle);
+		pointsDry.add(totalTitle);
+
+		int personalPoints = 0;
+		int totalPoints = 0;
+		int totalPointsDry = 0;
+		int personalPointsDry = 0;
+		int completionCount = atleastZero(getFilteredRTList().stream().mapToInt(RaidTracker::getCompletionCount).max().orElse(0));
+
+		if (loaded) {
+			int lastUniqueCompletionCount = atleastZero(getFilteredRTList().stream().filter(c -> !Objects.equals(c.getSpecialLoot(), "")).mapToInt(RaidTracker::getCompletionCount).reduce((a, b) -> b).orElse(0));
+			totalPointsDry = atleastZero(getFilteredRTList().stream().filter(c -> c.getCompletionCount() < lastUniqueCompletionCount).mapToInt(RaidTracker::getTotalPoints).sum());
+			personalPointsDry = atleastZero(getFilteredRTList().stream().filter(c -> c.getCompletionCount() < lastUniqueCompletionCount).mapToInt(RaidTracker::getPersonalPoints).sum());
+
+				//getFilteredRTList().stream().filter(c -> c.getCompletionCount() > lastUniqueCompletionCount).mapToInt(RaidTracker::getTotalPoints).sum();
+
+				//atleastZero(Math.toIntExact(getFilteredRTList().stream().filter(c -> !Objects.equals(c.getSpecialLoot(), "")).count()));
+
+		}
+
+		JLabel personalPointsLabel = textPanel(format(personalPointsDry));
+		personalPointsLabel.setToolTipText(NumberFormat.getInstance().format(personalPointsDry) + " Personal Points");
+		personalTitle.setToolTipText(NumberFormat.getInstance().format(personalPointsDry) + " Personal Points");
+
+		JLabel totalPointsLabel = textPanel(format(totalPointsDry));
+		totalPointsLabel.setToolTipText(NumberFormat.getInstance().format(totalPointsDry) + " Total Points");
+		totalTitle.setToolTipText(NumberFormat.getInstance().format(totalPointsDry) + " Total Points");
+
+		pointsDry.add(personalPointsLabel);
+		pointsDry.add(totalPointsLabel);
+
+		return pointsDry;
+	}
 
     private JPanel getSplitsEarnedPanel() {
         final JPanel wrapper = new JPanel();
