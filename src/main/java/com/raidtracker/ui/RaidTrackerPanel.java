@@ -542,11 +542,6 @@ public class RaidTrackerPanel extends PluginPanel {
 			int lastUniqueCompletionCount = atleastZero(getFilteredRTList().stream().filter(c -> !Objects.equals(c.getSpecialLoot(), "")).mapToInt(RaidTracker::getCompletionCount).reduce((a, b) -> b).orElse(0));
 			totalPointsDry = atleastZero(getFilteredRTList().stream().filter(c -> c.getCompletionCount() < lastUniqueCompletionCount).mapToInt(RaidTracker::getTotalPoints).sum());
 			personalPointsDry = atleastZero(getFilteredRTList().stream().filter(c -> c.getCompletionCount() < lastUniqueCompletionCount).mapToInt(RaidTracker::getPersonalPoints).sum());
-
-				//getFilteredRTList().stream().filter(c -> c.getCompletionCount() > lastUniqueCompletionCount).mapToInt(RaidTracker::getTotalPoints).sum();
-
-				//atleastZero(Math.toIntExact(getFilteredRTList().stream().filter(c -> !Objects.equals(c.getSpecialLoot(), "")).count()));
-
 		}
 
 		JLabel personalPointsLabel = textPanel(format(personalPointsDry));
