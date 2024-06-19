@@ -85,16 +85,26 @@ public interface RaidTrackerConfig extends Config
 	{
 		return true;
 	}
-
 	@ConfigItem(
-		keyName = "showPointsDry",
-		name = "Show Points Dry",
-		description = "Disable this checkmark to hide the Points Dry Panel in the ui"
+		keyName = "showPointsDryReceived",
+		name = "Show Points Dry Since Last Received Purple",
+		description = "Disable this checkmark to hide the Points Dry Received Panel in the ui"
 	)
-	default boolean showPointsDry()
+	default boolean showPointsDryReceived()
 	{
 		return true;
 	}
+	@ConfigItem(
+		keyName = "showPointsDrySeen",
+		name = "Show Points Dry Since Last Seen Purple",
+		description = "Disable this checkmark to hide the Points Dry Seen Panel in the ui"
+	)
+
+	default boolean showPointsDrySeen()
+	{
+		return false;
+	}
+
 	@ConfigItem(
 			keyName = "showTimeSplits",
 			name = "Show Time Splits",
