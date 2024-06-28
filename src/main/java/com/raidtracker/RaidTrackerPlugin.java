@@ -12,8 +12,8 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -72,8 +72,8 @@ public class RaidTrackerPlugin extends Plugin
 	private RaidTrackerPanel panel;
 	private NavigationButton navButton;
 
-	@Setter
-	private FileReadWriter fw = new FileReadWriter();
+	@Inject
+	private FileReadWriter fw;
 
 	private boolean writerStarted = false;
 
@@ -120,8 +120,8 @@ public class RaidTrackerPlugin extends Plugin
 			return;
 		}
 
-		boolean tempInRaid = client.getVar(Varbits.IN_RAID) == 1;
-		boolean tempInTob = client.getVar(Varbits.THEATRE_OF_BLOOD) > 1;
+		boolean tempInRaid = client.getVarbitValue(Varbits.IN_RAID) == 1;
+		boolean tempInTob = client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1;
 
 		// if the player's raid state has changed
 		if (tempInRaid ^ raidTracker.isInRaidChambers()) {
@@ -223,7 +223,7 @@ public class RaidTrackerPlugin extends Plugin
 		}
 
 		switch (event.getGroupId()) {
-			case (WidgetID.CHAMBERS_OF_XERIC_REWARD_GROUP_ID):
+			case (InterfaceID.CHAMBERS_OF_XERIC_REWARD):
 				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {
 					return;
 				}
@@ -254,7 +254,7 @@ public class RaidTrackerPlugin extends Plugin
 
 				break;
 
-			case (WidgetID.THEATRE_OF_BLOOD_GROUP_ID):
+			case (InterfaceID.TOB):
 				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {
 					return;
 				}
@@ -415,13 +415,13 @@ public class RaidTrackerPlugin extends Plugin
 			}
 
 			if (message.startsWith(RAID_COMPLETE_MESSAGE)) {
-				raidTracker.setTotalPoints(client.getVar(Varbits.TOTAL_POINTS));
+				raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
 
-				raidTracker.setPersonalPoints(client.getVar(Varbits.PERSONAL_POINTS));
+				raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
 
 				raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
 
-				raidTracker.setTeamSize(client.getVar(Varbits.RAID_PARTY_SIZE));
+				raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
 
 				raidTracker.setRaidComplete(true);
 
@@ -644,7 +644,7 @@ public class RaidTrackerPlugin extends Plugin
 			return;
 		}
 
-		raidTracker.setInRaidChambers(client.getVar(Varbits.IN_RAID) == 1);
+		raidTracker.setInRaidChambers(client.getVarbitValue(Varbits.IN_RAID) == 1);
 	}
 
 	private void checkTobPresence() {
@@ -652,7 +652,7 @@ public class RaidTrackerPlugin extends Plugin
 			return;
 		}
 		//1 = in party outside, 2 = spectating, 3 = dead spectating
-		raidTracker.setInTheatreOfBlood(client.getVar(Varbits.THEATRE_OF_BLOOD) > 1);
+		raidTracker.setInTheatreOfBlood(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1);
 	}
 
 	private int stringTimeToSeconds(String s)
@@ -754,5 +754,9 @@ public class RaidTrackerPlugin extends Plugin
 			sb.append(ch);
 		}
 		return sb.toString();
+	}
+
+	public void setFw(FileReadWriter fw) {
+		this.fw = fw;
 	}
 }

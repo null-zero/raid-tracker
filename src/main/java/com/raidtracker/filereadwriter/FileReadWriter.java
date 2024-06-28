@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Inject;
 import com.raidtracker.RaidTracker;
 import com.raidtracker.RaidTrackerItem;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
 
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
 
@@ -22,6 +24,10 @@ public class FileReadWriter {
     private String username;
     private String coxDir;
     private String tobDir;
+
+    @Inject
+    private Gson gson;
+
 
     public void writeToFile(RaidTracker raidTracker)
     {
@@ -38,7 +44,7 @@ public class FileReadWriter {
             log.info("writer started");
 
             //use json format so serializing and deserializing is easy
-            Gson gson = new GsonBuilder().create();
+//            Gson gson = this.clientGson.newBuilder().create();
 
             JsonParser parser = new JsonParser();
 
@@ -107,7 +113,7 @@ public class FileReadWriter {
         }
 
         try {
-            Gson gson = new GsonBuilder().create();
+//            Gson gson = this.clientGson.newBuilder().create();
             JsonParser parser = new JsonParser();
 
             BufferedReader bufferedreader = new BufferedReader(new FileReader(fileName));
@@ -180,7 +186,7 @@ public class FileReadWriter {
             dir = coxDir;
         }
         try {
-            Gson gson = new GsonBuilder().create();
+//            Gson gson = this.clientGson.newBuilder().create();
 
             JsonParser parser = new JsonParser();
 
