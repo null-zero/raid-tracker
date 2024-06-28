@@ -21,6 +21,9 @@ If you find any bugs or problems, feel free to add me on discord, and I'll accep
 
 ## Changelog:
 
+### v1.4.3
+- Remove functionality for Beta Worlds as it doesn't necessarily make sense to track and was causing crashes.
+
 ### v1.4.2
 - Added dey0 time tracking to the raid_tracker_data.log file, toggleable in the settings. Adding these times to the ui are planned for the next version.
 - Increased the amount of date filters in the filter panel: added a filter for 12 hours, 3 days and 3 months.
