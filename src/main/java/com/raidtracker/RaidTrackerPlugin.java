@@ -65,7 +65,7 @@ public class RaidTrackerPlugin extends Plugin
 
 	@Inject
 	private RaidTracker raidTracker;
-	
+
 	private static final WorldPoint TEMP_LOCATION = new WorldPoint(3360, 5152, 2);
 
 	@Setter
@@ -85,7 +85,7 @@ public class RaidTrackerPlugin extends Plugin
 
 	@Override
 	protected void startUp() {
-		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread);
+		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread, client);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel-icon.png");
 
@@ -115,8 +115,11 @@ public class RaidTrackerPlugin extends Plugin
 
 
 	@Subscribe
-	public void onVarbitChanged(VarbitChanged event)
-	{
+	public void onVarbitChanged(VarbitChanged event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		boolean tempInRaid = client.getVar(Varbits.IN_RAID) == 1;
 		boolean tempInTob = client.getVar(Varbits.THEATRE_OF_BLOOD) > 1;
 
@@ -171,8 +174,11 @@ public class RaidTrackerPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged event)
-	{
+	public void onGameStateChanged(GameStateChanged event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		if (event.getGameState() == GameState.LOGGING_IN)
 		{
 			fw.updateUsername(client.getUsername());
@@ -202,13 +208,20 @@ public class RaidTrackerPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage event)
-	{
+	public void onChatMessage(ChatMessage event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		checkChatMessage(event, raidTracker);
 	}
 
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		switch (event.getGroupId()) {
 			case (WidgetID.CHAMBERS_OF_XERIC_REWARD_GROUP_ID):
 				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {

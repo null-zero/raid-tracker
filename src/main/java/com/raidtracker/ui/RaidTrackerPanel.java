@@ -4,12 +4,15 @@ package com.raidtracker.ui;
 import com.raidtracker.RaidTracker;
 import com.raidtracker.RaidTrackerConfig;
 import com.raidtracker.RaidTrackerItem;
+import com.raidtracker.WorldUtils;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemID;
+import net.runelite.api.WorldType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -29,15 +32,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static java.lang.Math.floor;
 import static java.util.Comparator.comparing;
 
 @Slf4j
@@ -48,6 +46,7 @@ public class RaidTrackerPanel extends PluginPanel {
     private final FileReadWriter fw;
     private final RaidTrackerConfig config;
     private final ClientThread clientThread;
+    private final Client client;
 
     @Setter
     private ArrayList<RaidTracker> RTList;
@@ -108,11 +107,12 @@ public class RaidTrackerPanel extends PluginPanel {
     );
 
 
-    public RaidTrackerPanel(final ItemManager itemManager, FileReadWriter fw, RaidTrackerConfig config, ClientThread clientThread) {
+    public RaidTrackerPanel(final ItemManager itemManager, FileReadWriter fw, RaidTrackerConfig config, ClientThread clientThread, Client client) {
         this.itemManager = itemManager;
         this.fw = fw;
         this.config = config;
         this.clientThread = clientThread;
+        this.client = client;
 
         panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
@@ -123,8 +123,35 @@ public class RaidTrackerPanel extends PluginPanel {
         updateView();
     }
 
+    /*
+    View to show when the tracker is disabled.
+    This could occur due to being on a temporary world where we don't want to save the data.
+     */
+    private void showDisabledView() {
+        panel.removeAll();
+
+        JPanel title = new JPanel();
+        JPanel titleLabelWrapper = new JPanel();
+        JLabel titleLabel = new JLabel("Tracker Disabled on Beta Worlds");
+        titleLabel.setForeground(Color.WHITE);
+
+        titleLabelWrapper.add(titleLabel, BorderLayout.CENTER);
+
+        title.add(titleLabelWrapper);
+
+        panel.add(title);
+        panel.revalidate();
+        panel.repaint();
+    }
+
     private void updateView() {
         panel.removeAll();
+
+        // If the panel is updated we don't need to show data for Beta worlds
+        if (WorldUtils.playerOnBetaWorld(client)) {
+            showDisabledView();
+            return;
+        }
 
         JPanel title = getTitle();
         JPanel filterPanel = getFilterPanel();
@@ -575,7 +602,7 @@ public class RaidTrackerPanel extends PluginPanel {
                     priceMap.put(item.getId(), item.getPrice());
                 }
 
-                if (uniqueIDs.values().size() > 0) {
+                if (!uniqueIDs.values().isEmpty()) {
                     for (RaidTracker RT : getFilteredRTList()) {
                         for (RaidTrackerItem item : RT.getLootList()) {
                             RaidTrackerItem RTI = uniqueIDs.get(item.getId());
