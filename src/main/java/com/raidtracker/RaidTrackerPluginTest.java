@@ -1,9 +1,12 @@
 package com.raidtracker;
 
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Inject;
+import com.raidtracker.ToAPointsTracker.module.ToAPointsTrackerModule;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import com.raidtracker.ui.RaidTrackerPanel;
+import com.raidtracker.ToAPointsTracker.module.ComponentManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -37,12 +40,14 @@ import static java.lang.Float.parseFloat;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Raid Data Tracker"
+	name = "Raid Data Tracker Test"
 )
-public class RaidTrackerPlugin extends Plugin
+public class RaidTrackerPluginTest extends Plugin
 {
 	private static final String LEVEL_COMPLETE_MESSAGE = "complete! Duration:";
 	private static final String RAID_COMPLETE_MESSAGE = "Congratulations - your raid is complete!";
+
+	private static final String RAID_COMPLETE_MESSAGE_TOA = "Challenge complete: The Wardens.";
 	private static final String DUST_RECIPIENTS = "Dust recipients: ";
 	private static final String TWISTED_KIT_RECIPIENTS = "Twisted Kit recipients: ";
 
@@ -65,7 +70,7 @@ public class RaidTrackerPlugin extends Plugin
 
 	@Inject
 	private RaidTracker raidTracker;
-	
+
 	private static final WorldPoint TEMP_LOCATION = new WorldPoint(3360, 5152, 2);
 
 	@Setter
@@ -82,9 +87,20 @@ public class RaidTrackerPlugin extends Plugin
 	{
 		return configManager.getConfig(RaidTrackerConfig.class);
 	}
+	private ComponentManager componentManager = null;
 
 	@Override
+	public void configure(Binder binder)
+	{
+		binder.install(new ToAPointsTrackerModule());
+	}
+	@Override
 	protected void startUp() {
+		if (componentManager == null)
+		{
+			componentManager = injector.getInstance(ComponentManager.class);
+		}
+		componentManager.onPluginStart();
 		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread, client);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel-icon.png");
@@ -122,6 +138,7 @@ public class RaidTrackerPlugin extends Plugin
 
 		boolean tempInRaid = client.getVarbitValue(Varbits.IN_RAID) == 1;
 		boolean tempInTob = client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1;
+		boolean tempInToa = client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0;
 
 		// if the player's raid state has changed
 		if (tempInRaid ^ raidTracker.isInRaidChambers()) {
@@ -150,6 +167,31 @@ public class RaidTrackerPlugin extends Plugin
 		if (tempInTob ^ raidTracker.isInTheatreOfBlood()) {
 			if (tempInTob && raidTracker.isLoggedIn()) {
 				checkTobPresence();
+			}
+			else if (raidTracker.isRaidComplete()) {
+				//not tested
+
+				if (writerStarted) {
+					return;
+				}
+
+				fw.writeToFile(raidTracker);
+
+				writerStarted = true;
+
+				SwingUtilities.invokeLater(() -> {
+					panel.addDrop(raidTracker);
+					reset();
+				});
+			}
+			else {
+				reset();
+			}
+		}
+
+		if (tempInToa ^ raidTracker.isInTombsOfAmascut()) {
+			if (tempInToa && raidTracker.isLoggedIn()) {
+				checkToaPresence();
 			}
 			else if (raidTracker.isRaidComplete()) {
 				//not tested
@@ -365,7 +407,6 @@ public class RaidTrackerPlugin extends Plugin
 					raidTracker.setMiddleTime(stringTimeToSeconds(timeString.split(" ")[timeString.split(" ").length - 1]));
 				}
 				if (message.startsWith("Lower")) {
-					raidTracker.setLowerTime(stringTimeToSeconds(message.split(" level complete! Duration: ")[1]));
 					raidTracker.setLowerTime(stringTimeToSeconds(timeString.split(" ")[timeString.split(" ").length - 1]));
 				}
 
@@ -415,7 +456,7 @@ public class RaidTrackerPlugin extends Plugin
 
 			}
 
-			if (message.startsWith(RAID_COMPLETE_MESSAGE)) {
+			if (message.startsWith(RAID_COMPLETE_MESSAGE) || message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
 				raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
 
 				raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
@@ -654,6 +695,15 @@ public class RaidTrackerPlugin extends Plugin
 		}
 		//1 = in party outside, 2 = spectating, 3 = dead spectating
 		raidTracker.setInTheatreOfBlood(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1);
+	}
+
+	private void checkToaPresence()
+	{
+		if (client.getGameState() != GameState.LOGGED_IN) {
+			return;
+		}
+
+		raidTracker.setInTombsOfAmascut(client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0);
 	}
 
 	private int stringTimeToSeconds(String s)

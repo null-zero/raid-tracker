@@ -900,7 +900,8 @@ public class RaidTrackerPanel extends PluginPanel {
 						ToaUUIDMap.put(tempRaidTracker.getUniqueID(), tempRaidTracker);
 					});
 					toaRTList = new ArrayList<>(ToaUUIDMap.values());
-					fw.updateRTList(toaRTList, raidType.TOB);
+					fw.updateRTList(toaRTList, raidType.TOA);
+					break;
 			}
             updateView();
         });
@@ -1030,6 +1031,8 @@ public class RaidTrackerPanel extends PluginPanel {
         c.anchor = GridBagConstraints.EAST;
 		switch (currentRaid) {
 			case COX:
+				wrapper.add(cm, c);
+				break;
 			case TOA:
 				wrapper.add(cm, c);
 				break;
@@ -1519,6 +1522,17 @@ public class RaidTrackerPanel extends PluginPanel {
 
 		switch(currentRaid) {
 			case TOB:
+				if (mvpFilter.equals("Both")) {
+					tempRTList = tobRTList;
+				} else if (mvpFilter.equals("My MVP")) {
+					tempRTList = tobRTList.stream().filter(RaidTracker::isMvpInOwnName)
+						.collect(Collectors.toCollection(ArrayList::new));
+				} else {
+					tempRTList = tobRTList.stream().filter(RT -> !RT.isMvpInOwnName())
+						.collect(Collectors.toCollection(ArrayList::new));
+				}
+				break;
+			case COX:
 				if (cmFilter.equals("CM & Normal")) {
 					tempRTList = RTList;
 				} else if (cmFilter.equals("CM Only")) {
@@ -1529,18 +1543,19 @@ public class RaidTrackerPanel extends PluginPanel {
 						.collect(Collectors.toCollection(ArrayList::new));
 				}
 				break;
-			case COX:
 			case TOA:
-			default:
-				if (mvpFilter.equals("Both")) {
-					tempRTList = tobRTList;
+				if (mvpFilter.equals("All")) {
+					tempRTList = toaRTList;
 				} else if (mvpFilter.equals("My MVP")) {
-					tempRTList = tobRTList.stream().filter(RaidTracker::isMvpInOwnName)
+					tempRTList = toaRTList.stream().filter(RaidTracker::isMvpInOwnName)
 						.collect(Collectors.toCollection(ArrayList::new));
 				} else {
-					tempRTList = tobRTList.stream().filter(RT -> !RT.isMvpInOwnName())
+					tempRTList = toaRTList.stream().filter(RT -> !RT.isMvpInOwnName())
 						.collect(Collectors.toCollection(ArrayList::new));
 				}
+				break;
+			default:
+				tempRTList = RTList;
 		}
 
 

@@ -14,6 +14,7 @@ public class RaidTracker {
     boolean challengeMode = false;
     boolean inRaidChambers = false;
     boolean inTheatreOfBlood = false;
+	boolean inTombsOfAmascut = false;
     boolean FreeForAll = false;
 
     int upperTime = -1;
