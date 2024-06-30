@@ -384,6 +384,35 @@ public class RaidTrackerPlugin extends Plugin
 				if (message.toLowerCase().contains("mystics")) {
 					raidTracker.setMysticsTime(stringTimeToSeconds(timeString.split(" ")[0]));
 				}
+
+				if (message.toLowerCase().contains("tekton")) {
+					raidTracker.setTektonTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("muttadiles")) {
+					raidTracker.setMuttadilesTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("vespula")) {
+					raidTracker.setVespulaTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("ice demon")) {
+					raidTracker.setIceDemonTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("thieving")) {
+					raidTracker.setThievingTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("tightrope")) {
+					raidTracker.setTightropeTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("crabs")) {
+					raidTracker.setCrabsTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
 			}
 
 			if (message.startsWith(RAID_COMPLETE_MESSAGE)) {
