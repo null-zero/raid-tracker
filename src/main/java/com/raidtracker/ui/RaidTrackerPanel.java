@@ -4,6 +4,7 @@ package com.raidtracker.ui;
 import com.raidtracker.RaidTracker;
 import com.raidtracker.RaidTrackerConfig;
 import com.raidtracker.RaidTrackerItem;
+import com.raidtracker.RaidType;
 import com.raidtracker.WorldUtils;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import lombok.Getter;
@@ -95,6 +96,9 @@ public class RaidTrackerPanel extends PluginPanel {
     @Setter
     private String teamSizeFilter = "All sizes";
 
+	@Getter
+	private RaidType selectedRaidTab = RaidType.COX;
+
     @Getter
     private boolean isTob = false;
 
@@ -131,6 +135,17 @@ public class RaidTrackerPanel extends PluginPanel {
             RaidUniques.OLMLET
     );
 
+	@Getter
+	EnumSet<RaidUniques> toaUniques = EnumSet.of(
+		RaidUniques.OSMUMTENS_FANG,
+		RaidUniques.LIGHTBEARER,
+		RaidUniques.ELIDINIS_WARD,
+		RaidUniques.MASORI_MASK,
+		RaidUniques.MASORI_BODY,
+		RaidUniques.MASORI_CHAPS,
+		RaidUniques.SHADOW,
+		RaidUniques.TUMEKENS_GUARDIAN
+	);
 
     public RaidTrackerPanel(final ItemManager itemManager, FileReadWriter fw, RaidTrackerConfig config, ClientThread clientThread, Client client) {
         this.itemManager = itemManager;
