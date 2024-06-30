@@ -10,9 +10,9 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.raidtracker.RaidTracker;
 import com.raidtracker.RaidTrackerItem;
+import com.raidtracker.raidType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
 
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
 
@@ -24,6 +24,7 @@ public class FileReadWriter {
     private String username;
     private String coxDir;
     private String tobDir;
+	private String toaDir;
 
     @Inject
     private Gson gson;
@@ -93,16 +94,23 @@ public class FileReadWriter {
         return RTJson.toString().replace("\\\"", "\"").replace("\"[", "[").replace("]\"", "]");
     }
 
-    public ArrayList<RaidTracker> readFromFile(String alternateFile, boolean isTob)
+    public ArrayList<RaidTracker> readFromFile(String alternateFile, raidType isRaid)
     {
         String dir;
 
-        if (isTob) {
-            dir = tobDir;
-        }
-        else {
-            dir = coxDir;
-        }
+		switch(isRaid) {
+			case COX:
+				dir = coxDir;
+				break;
+			case TOB:
+				dir = tobDir;
+				break;
+			case TOA:
+				dir = toaDir;
+				break;
+			default:
+				dir = coxDir;
+		}
 
         String fileName;
         if (alternateFile.length() != 0) {
@@ -140,11 +148,11 @@ public class FileReadWriter {
     }
 
     public ArrayList<RaidTracker> readFromFile() {
-        return readFromFile("", false);
+        return readFromFile("", raidType.COX);
     }
 
-    public ArrayList<RaidTracker> readFromFile(boolean isTob) {
-        return readFromFile("", isTob);
+    public ArrayList<RaidTracker> readFromFile(raidType isRaid) {
+        return readFromFile("", isRaid);
     }
 
     public void createFolders()
@@ -155,20 +163,25 @@ public class FileReadWriter {
         IGNORE_RESULT(dir.mkdir());
         File dir_cox = new File(dir, "cox");
         File dir_tob = new File(dir, "tob");
+		File dir_toa = new File(dir, "toa");
         IGNORE_RESULT(dir_cox.mkdir());
         IGNORE_RESULT(dir_tob.mkdir());
+		IGNORE_RESULT(dir_toa.mkdir());
         File newCoxFile = new File(dir_cox + "\\raid_tracker_data.log");
         File newTobFile = new File(dir_tob + "\\raid_tracker_data.log");
+		File newToaFile = new File(dir_toa + "\\raid_tracker_data.log");
 
         try {
             IGNORE_RESULT(newCoxFile.createNewFile());
             IGNORE_RESULT(newTobFile.createNewFile());
+			IGNORE_RESULT(newToaFile.createNewFile());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         this.coxDir = dir_cox.getAbsolutePath();
         this.tobDir = dir_tob.getAbsolutePath();
+		this.toaDir = dir_toa.getAbsolutePath();
     }
 
     public void updateUsername(final String username) {
@@ -176,15 +189,20 @@ public class FileReadWriter {
         createFolders();
     }
 
-    public void updateRTList(ArrayList<RaidTracker> RTList, boolean isTob) {
+    public void updateRTList(ArrayList<RaidTracker> RTList, raidType currentRaid) {
         String dir;
 
-        if (isTob) {
-            dir = tobDir;
-        }
-        else {
-            dir = coxDir;
-        }
+		switch(currentRaid) {
+			case TOB:
+				dir = tobDir;
+				break;
+			case TOA:
+				dir = toaDir;
+				break;
+			case COX:
+			default:
+				dir = coxDir;
+		}
         try {
 //            Gson gson = this.clientGson.newBuilder().create();
 
@@ -217,18 +235,23 @@ public class FileReadWriter {
     }
 
     public void updateRTList(ArrayList<RaidTracker> RTList) {
-        updateRTList(RTList, false);
+        updateRTList(RTList, raidType.COX);
     }
 
-    public boolean delete(boolean isTob) {
+    public boolean delete(raidType currentRaid) {
         String dir;
 
-        if (isTob) {
-            dir = tobDir;
-        }
-        else {
-            dir = coxDir;
-        }
+		switch(currentRaid) {
+			case TOB:
+				dir = tobDir;
+				break;
+			case TOA:
+				dir = toaDir;
+				break;
+			case COX:
+			default:
+				dir = coxDir;
+		}
 
         File newFile = new File(dir + "\\raid_tracker_data.log");
 

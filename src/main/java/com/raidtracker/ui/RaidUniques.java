@@ -28,7 +28,15 @@ public enum RaidUniques {
     JUSTI_CHESTGUARD("Justiciar chestguard", ItemID.JUSTICIAR_CHESTGUARD),
     JUSTI_LEGGUARDS("Justiciar legguards", ItemID.JUSTICIAR_LEGGUARDS),
     SCYTHE("Scythe of vitur (uncharged)", ItemID.SCYTHE_OF_VITUR_UNCHARGED),
-    LILZIK("Lil' Zik", 22473);
+    LILZIK("Lil' Zik", 22473),
+	OSMUMTENS_FANG("Osmumten's fang", ItemID.OSMUMTENS_FANG),
+	LIGHTBEARER("Lightbearer", ItemID.LIGHTBEARER),
+	ELIDINIS_WARD("Elidinis' ward", ItemID.ELIDINIS_WARD),
+	MASORI_MASK("Masori mask", ItemID.MASORI_MASK),
+	MASORI_BODY("Masori body", ItemID.MASORI_BODY),
+	MASORI_CHAPS("Masori chaps", ItemID.MASORI_CHAPS),
+	SHADOW("Tumeken's shadow (uncharged)", ItemID.TUMEKENS_SHADOW),
+	TUMEKENS_GUARDIAN("Tumeken's guardian", ItemID.TUMEKENS_GUARDIAN);
 
     @Getter
     private final String name;
