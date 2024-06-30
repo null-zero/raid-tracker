@@ -127,7 +127,7 @@ public class RaidTrackerTest extends TestCase
 	{
 		RaidTracker raidTracker = new RaidTracker();
 
-		when(client.getVar(ArgumentMatchers.any(Varbits.class))).thenReturn(5); //random integer, I chose 5
+		when(client.getVarbitValue(anyInt())).thenReturn(5); //random integer, I chose 5
 		raidTracker.setInRaidChambers(true);
 
 		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Congratulations - your raid is complete! Team size: 15 Players Duration: 50:26 Personal best: 31:12", "", 0);
@@ -146,12 +146,31 @@ public class RaidTrackerTest extends TestCase
 		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Congratulations - your raid is complete! Team size: Solo Duration: 40:26 Personal best: 31:12", "", 0);
 		raidTrackerPlugin.checkChatMessage(message, raidTracker);
 
-		assertEquals(2426, raidTracker.getRaidTime());
+		assertEquals(6026, raidTracker.getRaidTime());
 
-		message.setMessage("Congratulations - your raid is complete! Team size: 11-15 Players Duration: 50:26 Personal best: 31:12");
+		message.setMessage("Congratulations - your raid is complete! Team size: 11-15 Players Duration: 50:26.6 Personal best: 31:12");
 		raidTrackerPlugin.checkChatMessage(message, raidTracker);
 
-		assertEquals(3026, raidTracker.getRaidTime());
+		assertEquals(3027, raidTracker.getRaidTime());
+
+		//dey0 case
+		message.setMessage("Middle level complete! Duration: 7:53 Total: 20:50");
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals(1250, raidTracker.getMiddleTime());
+
+		//regular case
+		message.setMessage("Middle level complete! Duration: 20:50");
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals(1250, raidTracker.getMiddleTime());
+
+		message.setMessage("Combat room 'Vanguards' complete! Duration: 3:19 Total: 16:16");
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals(199, raidTracker.getVanguardsTime());
+
+
 	}
 
 	@Test

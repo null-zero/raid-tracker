@@ -12,8 +12,8 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -24,7 +24,6 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 import net.runelite.client.game.ItemManager;
-import org.apache.commons.text.StringEscapeUtils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -34,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.Float.parseFloat;
 
 @Slf4j
 @PluginDescriptor(
@@ -41,7 +41,7 @@ import static java.lang.Integer.parseInt;
 )
 public class RaidTrackerPlugin extends Plugin
 {
-	private static final String LEVEL_COMPLETE_MESSAGE = "level complete!";
+	private static final String LEVEL_COMPLETE_MESSAGE = "complete! Duration:";
 	private static final String RAID_COMPLETE_MESSAGE = "Congratulations - your raid is complete!";
 	private static final String DUST_RECIPIENTS = "Dust recipients: ";
 	private static final String TWISTED_KIT_RECIPIENTS = "Twisted Kit recipients: ";
@@ -72,8 +72,8 @@ public class RaidTrackerPlugin extends Plugin
 	private RaidTrackerPanel panel;
 	private NavigationButton navButton;
 
-	@Setter
-	private FileReadWriter fw = new FileReadWriter();
+	@Inject
+	private FileReadWriter fw;
 
 	private boolean writerStarted = false;
 
@@ -85,9 +85,9 @@ public class RaidTrackerPlugin extends Plugin
 
 	@Override
 	protected void startUp() {
-		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread);
+		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread, client);
 
-		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "panel-icon.png");
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel-icon.png");
 
 		navButton = NavigationButton.builder()
 				.tooltip("Raid Data Tracker")
@@ -115,10 +115,13 @@ public class RaidTrackerPlugin extends Plugin
 
 
 	@Subscribe
-	public void onVarbitChanged(VarbitChanged event)
-	{
-		boolean tempInRaid = client.getVar(Varbits.IN_RAID) == 1;
-		boolean tempInTob = client.getVar(Varbits.THEATRE_OF_BLOOD) > 1;
+	public void onVarbitChanged(VarbitChanged event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
+		boolean tempInRaid = client.getVarbitValue(Varbits.IN_RAID) == 1;
+		boolean tempInTob = client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1;
 
 		// if the player's raid state has changed
 		if (tempInRaid ^ raidTracker.isInRaidChambers()) {
@@ -171,8 +174,11 @@ public class RaidTrackerPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged event)
-	{
+	public void onGameStateChanged(GameStateChanged event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		if (event.getGameState() == GameState.LOGGING_IN)
 		{
 			fw.updateUsername(client.getUsername());
@@ -202,15 +208,22 @@ public class RaidTrackerPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage event)
-	{
+	public void onChatMessage(ChatMessage event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		checkChatMessage(event, raidTracker);
 	}
 
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event) {
+		if (WorldUtils.playerOnBetaWorld(client)) {
+			return;
+		}
+
 		switch (event.getGroupId()) {
-			case (WidgetID.CHAMBERS_OF_XERIC_REWARD_GROUP_ID):
+			case (InterfaceID.CHAMBERS_OF_XERIC_REWARD):
 				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {
 					return;
 				}
@@ -224,6 +237,7 @@ public class RaidTrackerPlugin extends Plugin
 				}
 
 				if (writerStarted) {
+					//unnecessary return check?
 					return;
 				}
 
@@ -240,7 +254,7 @@ public class RaidTrackerPlugin extends Plugin
 
 				break;
 
-			case (WidgetID.THEATRE_OF_BLOOD_GROUP_ID):
+			case (InterfaceID.TOB):
 				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {
 					return;
 				}
@@ -336,30 +350,50 @@ public class RaidTrackerPlugin extends Plugin
 			playerName = client.getLocalPlayer().getName();
 		}
 
-		if ((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood()) && event.getType() == ChatMessageType.FRIENDSCHATNOTIFICATION ||
-				((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood()) && event.getType() == ChatMessageType.GAMEMESSAGE)) {
+		if ((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood()) &&
+			(event.getType() == ChatMessageType.FRIENDSCHATNOTIFICATION || event.getType() == ChatMessageType.GAMEMESSAGE)) {
 			//unescape java to avoid unicode
 			String message = unescapeJavaString(Text.removeTags(event.getMessage()));
+
 			if (message.contains(LEVEL_COMPLETE_MESSAGE)) {
+				String timeString = message.split("complete! Duration: ")[1];
+
 				if (message.startsWith("Upper")) {
-					raidTracker.setUpperTime(stringTimeToSeconds(message.split(" level complete! Duration: ")[1]));
+					raidTracker.setUpperTime(stringTimeToSeconds(timeString.split(" ")[timeString.split(" ").length - 1]));
 				}
 				if (message.startsWith("Middle")) {
-					raidTracker.setMiddleTime(stringTimeToSeconds(message.split(" level complete! Duration: ")[1]));
+					raidTracker.setMiddleTime(stringTimeToSeconds(timeString.split(" ")[timeString.split(" ").length - 1]));
 				}
 				if (message.startsWith("Lower")) {
 					raidTracker.setLowerTime(stringTimeToSeconds(message.split(" level complete! Duration: ")[1]));
+					raidTracker.setLowerTime(stringTimeToSeconds(timeString.split(" ")[timeString.split(" ").length - 1]));
+				}
+
+				if (message.toLowerCase().contains("shamans")) {
+					raidTracker.setShamansTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("vasa")) {
+					raidTracker.setVasaTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("vanguards")) {
+					raidTracker.setVanguardsTime(stringTimeToSeconds(timeString.split(" ")[0]));
+				}
+
+				if (message.toLowerCase().contains("mystics")) {
+					raidTracker.setMysticsTime(stringTimeToSeconds(timeString.split(" ")[0]));
 				}
 			}
 
 			if (message.startsWith(RAID_COMPLETE_MESSAGE)) {
-				raidTracker.setTotalPoints(client.getVar(Varbits.TOTAL_POINTS));
+				raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
 
-				raidTracker.setPersonalPoints(client.getVar(Varbits.PERSONAL_POINTS));
+				raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
 
 				raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
 
-				raidTracker.setTeamSize(client.getVar(Varbits.RAID_PARTY_SIZE));
+				raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
 
 				raidTracker.setRaidComplete(true);
 
@@ -419,6 +453,7 @@ public class RaidTrackerPlugin extends Plugin
 
 			//only special loot contain the "-" (except for the raid complete message)
 			if (raidTracker.isRaidComplete() && message.contains("-") && !message.startsWith(RAID_COMPLETE_MESSAGE)) {
+				//in case of multiple purples, a new purple is stored on a new line in the file, so a new raidtracker object will be used and written to the file
 				if (!raidTracker.getSpecialLootReceiver().isEmpty()) {
 					RaidTracker altRT = copyData();
 
@@ -581,7 +616,7 @@ public class RaidTrackerPlugin extends Plugin
 			return;
 		}
 
-		raidTracker.setInRaidChambers(client.getVar(Varbits.IN_RAID) == 1);
+		raidTracker.setInRaidChambers(client.getVarbitValue(Varbits.IN_RAID) == 1);
 	}
 
 	private void checkTobPresence() {
@@ -589,12 +624,13 @@ public class RaidTrackerPlugin extends Plugin
 			return;
 		}
 		//1 = in party outside, 2 = spectating, 3 = dead spectating
-		raidTracker.setInTheatreOfBlood(client.getVar(Varbits.THEATRE_OF_BLOOD) > 1);
+		raidTracker.setInTheatreOfBlood(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1);
 	}
 
 	private int stringTimeToSeconds(String s)
 	{
-		return parseInt(s.split(":")[0]) * 60 + parseInt(s.split(":")[1]);
+		String[] split = s.split(":");
+		return split.length == 3 ? parseInt(split[0]) * 3600 + parseInt(split[1]) * 60 + Math.round(parseFloat(split[2])) : parseInt(split[0]) * 60 + Math.round(parseFloat(split[1]));
 	}
 
 	public RaidTracker copyData() {
@@ -690,5 +726,9 @@ public class RaidTrackerPlugin extends Plugin
 			sb.append(ch);
 		}
 		return sb.toString();
+	}
+
+	public void setFw(FileReadWriter fw) {
+		this.fw = fw;
 	}
 }
