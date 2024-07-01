@@ -359,6 +359,31 @@ public class RaidTrackerPluginTest extends Plugin
 				});
 
 				break;
+
+			case (InterfaceID.TOA_REWARD):
+				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {
+					return;
+				}
+
+				raidTracker.setChestOpened(true);
+
+				rewardItemContainer = client.getItemContainer(InventoryID.TOA_REWARD_CHEST);
+
+				if (rewardItemContainer == null) {
+					return;
+				}
+
+				raidTracker.setLootList(lootListFactory(rewardItemContainer.getItems()));
+
+				fw.writeToFile(raidTracker);
+
+				writerStarted = true;
+
+				SwingUtilities.invokeLater(() -> {
+					panel.addDrop(raidTracker);
+					reset();
+				});
+				break;
 		}
 	}
 
@@ -382,6 +407,26 @@ public class RaidTrackerPluginTest extends Plugin
 		return Integer.parseInt(widget.getText());
 	}
 
+	@Subscribe
+	public void onLootReceived(final LootReceived event)
+	{
+		System.out.println("Event received");
+		System.out.println(event.getName());
+		if(event.getName().equals("Tombs of Amascut"))
+		{
+			raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
+
+			raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
+
+			raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
+
+			raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
+
+			raidTracker.setRaidComplete(true);
+
+			raidTracker.setDate(System.currentTimeMillis());
+		}
+	}
 	public void checkChatMessage(ChatMessage event, RaidTracker raidTracker)
 	{
 		raidTracker.setLoggedIn(true);
@@ -392,7 +437,7 @@ public class RaidTrackerPluginTest extends Plugin
 			playerName = client.getLocalPlayer().getName();
 		}
 
-		if ((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood()) &&
+		if ((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood() || raidTracker.isInTombsOfAmascut()) &&
 			(event.getType() == ChatMessageType.FRIENDSCHATNOTIFICATION || event.getType() == ChatMessageType.GAMEMESSAGE)) {
 			//unescape java to avoid unicode
 			String message = unescapeJavaString(Text.removeTags(event.getMessage()));
@@ -555,7 +600,7 @@ public class RaidTrackerPluginTest extends Plugin
 			}
 
 			//for tob it works a bit different, not possible to get duplicates. - not tested in game yet.
-			if (raidTracker.isRaidComplete() && message.toLowerCase().contains("found something special") && !message.toLowerCase().contains("lil' zik")) {
+			if (raidTracker.isRaidComplete() && message.toLowerCase().contains("found something special") && !message.toLowerCase().contains("lil' zik") && !message.toLowerCase().contains("tumeken's guardian")) {
 				raidTracker.setSpecialLootReceiver(message.split(" found something special: ")[0]);
 				raidTracker.setSpecialLoot(message.split(" found something special: ")[1]);
 
@@ -601,7 +646,7 @@ public class RaidTrackerPluginTest extends Plugin
 				}
 			}
 
-			if (raidTracker.isRaidComplete() && (message.toLowerCase().contains("olmlet") || message.toLowerCase().contains("lil' zik")) || message.toLowerCase().contains("would have been followed")) {
+			if (raidTracker.isRaidComplete() && (message.toLowerCase().contains("olmlet") || message.toLowerCase().contains("lil' zik") || message.toLowerCase().contains("tumeken's guardian")) || message.toLowerCase().contains("would have been followed")) {
 				boolean inOwnName = false;
 				boolean duplicate = message.toLowerCase().contains("would have been followed");
 

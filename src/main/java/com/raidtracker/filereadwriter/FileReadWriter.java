@@ -37,7 +37,10 @@ public class FileReadWriter {
         if (raidTracker.isInTheatreOfBlood()) {
             dir = tobDir;
         }
-        else {
+		else if (raidTracker.isInTombsOfAmascut()) {
+			dir = toaDir;
+		}
+		else {
             dir = coxDir;
         }
         try
