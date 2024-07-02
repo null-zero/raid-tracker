@@ -487,18 +487,19 @@ public class RaidTrackerPluginTest extends Plugin
 
 			if (message.startsWith(RAID_COMPLETE_MESSAGE) || message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
 				// Toa points aren't held in varbits, use PointsTracker points instead, otherwise raid will fail to be logged
+				// For whatever reason RAID_PARTY_SIZE varbit doesn't track for ToA
 				if (message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
 					raidTracker.setTotalPoints(pointsTracker.getTotalPoints());
 					raidTracker.setPersonalPoints(pointsTracker.getPersonalTotalPoints());
+					raidTracker.setTeamSize((int) client.getLocalPlayer().getWorldView().players().stream().count());
 				} else
 				{
 					raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
 					raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
+					raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
 				}
 
 				raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
-
-				raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
 
 				raidTracker.setRaidComplete(true);
 
