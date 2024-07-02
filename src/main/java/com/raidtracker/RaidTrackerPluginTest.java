@@ -491,6 +491,7 @@ public class RaidTrackerPluginTest extends Plugin
 				if (message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
 					raidTracker.setTotalPoints(pointsTracker.getTotalPoints());
 					raidTracker.setPersonalPoints(pointsTracker.getPersonalTotalPoints());
+					raidTracker.setRaidLevel(client.getVarbitValue(Varbits.TOA_RAID_LEVEL));
 					raidTracker.setTeamSize((int) client.getLocalPlayer().getWorldView().players().stream().count());
 				} else
 				{

@@ -70,6 +70,8 @@ public class RaidTrackerPanel extends PluginPanel {
     @Setter
     private String mvpFilter = "Both";
     @Setter
+	private String raidLevelFilter = "All Levels";
+    @Setter
     private String teamSizeFilter = "All sizes";
 
     @Getter
@@ -997,6 +999,18 @@ public class RaidTrackerPanel extends PluginPanel {
             }
         });
 
+		JComboBox<String> raidLevel = new JComboBox<>(new String []{"All Levels", "Entry Mode", "Normal Mode", "Expert Mode"});
+		raidLevel.setFocusable(false);
+		raidLevel.setPreferredSize(new Dimension(110,25));
+		raidLevel.setSelectedItem(raidLevelFilter);
+
+		raidLevel.addActionListener(e -> {
+			raidLevelFilter = raidLevel.getSelectedItem().toString();
+			if (loaded) {
+				updateView();
+			}
+		});
+
         JComboBox<String> teamSize;
 
 		switch (currentRaid) {
@@ -1034,7 +1048,7 @@ public class RaidTrackerPanel extends PluginPanel {
 				wrapper.add(cm, c);
 				break;
 			case TOA:
-				wrapper.add(cm, c);
+				wrapper.add(raidLevel, c);
 				break;
 			case TOB:
 				wrapper.add(mvp, c);
@@ -1544,13 +1558,17 @@ public class RaidTrackerPanel extends PluginPanel {
 				}
 				break;
 			case TOA:
-				if (mvpFilter.equals("All")) {
+				if (raidLevelFilter.equals("All Levels")) {
 					tempRTList = toaRTList;
-				} else if (mvpFilter.equals("My MVP")) {
-					tempRTList = toaRTList.stream().filter(RaidTracker::isMvpInOwnName)
+				} else if (raidLevelFilter.equals("Entry Mode"))
+				{
+					tempRTList = toaRTList.stream().filter(RT -> RT.getRaidLevel() < 150)
+						.collect(Collectors.toCollection(ArrayList::new));
+				} else if (raidLevelFilter.equals("Normal Mode")) {
+					tempRTList = toaRTList.stream().filter(RT -> RT.getRaidLevel() >= 150 && RT.getRaidLevel() < 300)
 						.collect(Collectors.toCollection(ArrayList::new));
 				} else {
-					tempRTList = toaRTList.stream().filter(RT -> !RT.isMvpInOwnName())
+					tempRTList = toaRTList.stream().filter(RT -> RT.getRaidLevel() >= 300)
 						.collect(Collectors.toCollection(ArrayList::new));
 				}
 				break;
