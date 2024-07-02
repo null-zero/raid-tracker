@@ -1211,6 +1211,16 @@ public class RaidTrackerPanel extends PluginPanel {
 					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getVerzikTime() > 0).min(comparing(RaidTracker::getVerzikTime)).orElse(new RaidTracker()).getVerzikTime()), 1));
 					break;
 				case TOA:
+					timeTable.add(textPanel("BaBa Time", 0));
+					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getBabaTime() > 0).min(comparing(RaidTracker::getBabaTime)).orElse(new RaidTracker()).getBabaTime()), 1));
+					timeTable.add(textPanel("Kephri Time", 0));
+					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getKephriTime() > 0).min(comparing(RaidTracker::getKephriTime)).orElse(new RaidTracker()).getKephriTime()), 1));
+					timeTable.add(textPanel("Akkha Time", 0));
+					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getAkkhaTime() > 0).min(comparing(RaidTracker::getAkkhaTime)).orElse(new RaidTracker()).getAkkhaTime()), 1));
+					timeTable.add(textPanel("Zebak Time", 0));
+					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getZebakTime() > 0).min(comparing(RaidTracker::getZebakTime)).orElse(new RaidTracker()).getZebakTime()), 1));
+					timeTable.add(textPanel("Completion Time", 0));
+					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getToaCompTime() > 0).min(comparing(RaidTracker::getToaCompTime)).orElse(new RaidTracker()).getToaCompTime()), 1));
 					break;
 			}
 

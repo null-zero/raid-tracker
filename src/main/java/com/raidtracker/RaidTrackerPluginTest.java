@@ -1,4 +1,7 @@
 package com.raidtracker;
+import com.raidtracker.ToAPointsTracker.util.RaidRoom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.runelite.client.plugins.loottracker.LootReceived;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -47,8 +50,16 @@ public class RaidTrackerPluginTest extends Plugin
 {
 	private static final String LEVEL_COMPLETE_MESSAGE = "complete! Duration:";
 	private static final String RAID_COMPLETE_MESSAGE = "Congratulations - your raid is complete!";
-
 	private static final String RAID_COMPLETE_MESSAGE_TOA = "Challenge complete: The Wardens.";
+
+	private static final String TOA_ROOM_COMPLETE_PREFIX = "Challenge complete";
+	private static final Pattern TOA_ROOM_COMPLETE_PATTERN =
+		Pattern.compile("Challenge complete: (?:Path of )?([A-Za-z-]+).*Total:.*?([0-9]+:[.0-9]+).*");
+	private static final Pattern TOA_WARDENS_COMPLETE_PATTERN =
+		Pattern.compile("Challenge complete: The (Wardens).*?completion time:.*?([0-9]+:[.0-9]+).*");
+	private static final Pattern TOA_COMPLETION_PATTERN = Pattern.compile("Tombs of Amascut (.*) Mode challenge completion time:.*?([0-9]+:[.0-9]+).*");
+	private static final Pattern TOA_TOTAL_COMPLETION_PATTERN = Pattern.compile("Tombs of Amascut (.*) Mode total challenge completion time:.*?([0-9]+:[.0-9]+).*");
+
 	private static final String DUST_RECIPIENTS = "Dust recipients: ";
 	private static final String TWISTED_KIT_RECIPIENTS = "Twisted Kit recipients: ";
 
@@ -555,6 +566,50 @@ public class RaidTrackerPluginTest extends Plugin
 					}
 					raidTracker.setTeamSize(teamSize);
 					raidTracker.setRaidComplete(true);
+				}
+			}
+
+
+			if (message.startsWith(TOA_ROOM_COMPLETE_PREFIX)) {
+				Matcher m;
+				if ((m = TOA_WARDENS_COMPLETE_PATTERN.matcher(message)).matches() ||
+					(m = TOA_ROOM_COMPLETE_PATTERN.matcher(message)).matches()) {
+					RaidRoom room = RaidRoom.forString(m.group(1));
+					String split = m.group(2);
+					if (room == null)
+					{
+						log.warn("Failed to find room {} for completion string {}", m.group(1), event.getMessage());
+						return;
+					}
+
+					switch (room)
+					{
+						case BABA:
+							raidTracker.setBabaTime(stringTimeToSeconds(split));
+							break;
+						case KEPHRI:
+							raidTracker.setKephriTime(stringTimeToSeconds(split));
+							break;
+						case AKKHA:
+							raidTracker.setAkkhaTime(stringTimeToSeconds(split));
+							break;
+						case ZEBAK:
+							raidTracker.setZebakTime(stringTimeToSeconds(split));
+							break;
+						case WARDENS:
+							raidTracker.setWardensTime(stringTimeToSeconds(split));
+							break;
+						default:
+					}
+				}
+
+				if ((m = TOA_COMPLETION_PATTERN.matcher(message)).matches()) {
+					String split = m.group(2);
+					raidTracker.setToaCompTime(stringTimeToSeconds(split));
+				}
+				if ((m = TOA_TOTAL_COMPLETION_PATTERN.matcher(message)).matches()) {
+					String split = m.group(2);
+					raidTracker.setRaidTime(stringTimeToSeconds(split));
 				}
 			}
 
