@@ -1,5 +1,5 @@
 package com.raidtracker;
-
+import net.runelite.client.plugins.loottracker.LootReceived;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Inject;
@@ -7,6 +7,7 @@ import com.raidtracker.ToAPointsTracker.module.ToAPointsTrackerModule;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import com.raidtracker.ui.RaidTrackerPanel;
 import com.raidtracker.ToAPointsTracker.module.ComponentManager;
+import com.raidtracker.ToAPointsTracker.features.pointstracker.PointsTracker;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -70,6 +71,9 @@ public class RaidTrackerPluginTest extends Plugin
 
 	@Inject
 	private RaidTracker raidTracker;
+
+	@Inject
+	private PointsTracker pointsTracker;
 
 	private static final WorldPoint TEMP_LOCATION = new WorldPoint(3360, 5152, 2);
 
@@ -407,26 +411,6 @@ public class RaidTrackerPluginTest extends Plugin
 		return Integer.parseInt(widget.getText());
 	}
 
-	@Subscribe
-	public void onLootReceived(final LootReceived event)
-	{
-		System.out.println("Event received");
-		System.out.println(event.getName());
-		if(event.getName().equals("Tombs of Amascut"))
-		{
-			raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
-
-			raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
-
-			raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
-
-			raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
-
-			raidTracker.setRaidComplete(true);
-
-			raidTracker.setDate(System.currentTimeMillis());
-		}
-	}
 	public void checkChatMessage(ChatMessage event, RaidTracker raidTracker)
 	{
 		raidTracker.setLoggedIn(true);
@@ -502,9 +486,15 @@ public class RaidTrackerPluginTest extends Plugin
 			}
 
 			if (message.startsWith(RAID_COMPLETE_MESSAGE) || message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
-				raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
-
-				raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
+				// Toa points aren't held in varbits, use PointsTracker points instead, otherwise raid will fail to be logged
+				if (message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
+					raidTracker.setTotalPoints(pointsTracker.getTotalPoints());
+					raidTracker.setPersonalPoints(pointsTracker.getPersonalTotalPoints());
+				} else
+				{
+					raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
+					raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
+				}
 
 				raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
 
