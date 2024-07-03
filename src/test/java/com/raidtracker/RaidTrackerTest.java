@@ -4,11 +4,14 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import com.raidtracker.ui.RaidTrackerPanel;
+import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.TestCase;
 import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.party.WSClient;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.http.api.item.ItemPrice;
 import org.junit.Before;
@@ -105,6 +108,18 @@ public class RaidTrackerTest extends TestCase
 	@Mock
 	@Bind
 	private ItemManager itemManager;
+
+	@Mock
+	@Bind
+	private ChatMessageManager chatMessageManager;
+
+	@Mock
+	@Bind
+	private ScheduledExecutorService scheduledExecutorService;
+
+	@Mock
+	@Bind
+	private WSClient wsClient;
 
 	@Mock
 	@Bind
