@@ -9,7 +9,6 @@ import com.raidtracker.ui.RaidTrackerPanel;
 import com.raidtracker.ui.RaidUniques;
 import junit.framework.TestCase;
 import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
 import net.runelite.client.game.ItemManager;
 import org.junit.Before;
 import org.junit.Test;

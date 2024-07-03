@@ -2,7 +2,6 @@ package com.raidtracker;
 import com.raidtracker.ToAPointsTracker.util.RaidRoom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.runelite.client.plugins.loottracker.LootReceived;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Inject;
