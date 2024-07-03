@@ -430,7 +430,7 @@ public class RaidTrackerPanel extends PluginPanel {
 		buttonWrapper.add(toaButtonWrapper);
 
         JPanel titleLabelWrapper = new JPanel();
-        JLabel titleLabel = new JLabel("COX and TOB Data Tracker");
+        JLabel titleLabel = new JLabel("Raid Data Tracker");
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setBorder(new CompoundBorder(
                 new MatteBorder(0, 0, 1, 0, ColorScheme.LIGHT_GRAY_COLOR.darker()),
