@@ -366,7 +366,7 @@ public class SplitChanger extends JPanel {
     private RaidUniques getByName(String name) {
         EnumSet<RaidUniques> uniquesList = getUniquesList();
         for (RaidUniques unique: uniquesList) {
-            if (unique.getName().toLowerCase().equals(name.toLowerCase())) {
+            if (unique.getName().equalsIgnoreCase(name)) {
                 return unique;
             }
         }
@@ -375,10 +375,15 @@ public class SplitChanger extends JPanel {
     }
 
     EnumSet<RaidUniques> getUniquesList() {
-        if (raidTrackerPanel.isTob()) {
-            return raidTrackerPanel.getTobUniques();
-        }
-        return raidTrackerPanel.getCoxUniques();
+		switch (raidTrackerPanel.getCurrentRaid()) {
+			case TOA:
+				return raidTrackerPanel.getToaUniques();
+			case TOB:
+				return raidTrackerPanel.getTobUniques();
+			case COX:
+			default:
+				return raidTrackerPanel.getCoxUniques();
+		}
     }
 
     //from stackoverflow

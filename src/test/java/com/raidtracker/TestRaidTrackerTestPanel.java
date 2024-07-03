@@ -56,6 +56,7 @@ public class TestRaidTrackerPanel extends TestCase
         panel.setDateFilter("All Time");
         panel.setMvpFilter("Both");
         panel.setTeamSizeFilter("All sizes");
+		panel.setCurrentRaid(raidType.COX);
 
         when(panel.getUniquesList()).thenReturn(EnumSet.of(
                 RaidUniques.DEX,

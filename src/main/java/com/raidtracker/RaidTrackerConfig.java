@@ -1,8 +1,10 @@
 package com.raidtracker;
 
+import com.raidtracker.ToAPointsTracker.features.timetracking.SplitsMode;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 
 @ConfigGroup("raidtracker")
 public interface RaidTrackerConfig extends Config
@@ -93,16 +95,26 @@ public interface RaidTrackerConfig extends Config
 	{
 		return true;
 	}
-
 	@ConfigItem(
-		keyName = "showPointsDry",
-		name = "Show Points Dry",
-		description = "Disable this checkmark to hide the Points Dry Panel in the ui"
+		keyName = "showPointsDryReceived",
+		name = "Show Points Dry - Received",
+		description = "Disable this checkmark to hide the Points Dry Received Panel in the ui"
 	)
-	default boolean showPointsDry()
+	default boolean showPointsDryReceived()
 	{
 		return true;
 	}
+	@ConfigItem(
+		keyName = "showPointsDrySeen",
+		name = "Show Points Dry - Seen",
+		description = "Disable this checkmark to hide the Points Dry Seen Panel in the ui"
+	)
+
+	default boolean showPointsDrySeen()
+	{
+		return false;
+	}
+
 	@ConfigItem(
 			keyName = "showTimeSplits",
 			name = "Show Time Splits",
@@ -153,4 +165,122 @@ public interface RaidTrackerConfig extends Config
 		return true;
 	}
 
+	String CONFIG_GROUP = "RaidsDryMeterTest";
+
+	@ConfigSection(
+		name = "Points Tracker",
+		description = "<html>Tracks points for the raid, used in calculating drop chance." +
+			"<br/>NOTE: For teams, you MUST use the RuneLite Party plugin to receive team drop chance.</html>",
+		position = 6,
+		closedByDefault = true
+	)
+	String SECTION_POINTS_TRACKER = "sectionPointsTracker";
+
+	@ConfigSection(
+		name = "Time Tracking",
+		description = "Time tracking and splits.",
+		position = 9,
+		closedByDefault = true
+	)
+	String SECTION_TIME_TRACKING = "sectionTimeTracking";
+
+	// Points Tracker
+
+	@ConfigItem(
+		keyName = "pointsTrackerOverlayEnable",
+		name = "Enable Overlay",
+		description = "Show points earned within the raid.",
+		position = 0,
+		section = SECTION_POINTS_TRACKER
+	)
+	default boolean pointsTrackerOverlayEnable()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "pointsTrackerShowRoomPoints",
+		name = "Separate Room Points",
+		description = "Show points for the current room separate from total points.",
+		position = 1,
+		section = SECTION_POINTS_TRACKER
+	)
+	default boolean pointsTrackerShowRoomPoints()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "pointsTrackerShowUniqueChance",
+		name = "Show Unique %",
+		description = "Show unique chance on the overlay.",
+		position = 2,
+		section = SECTION_POINTS_TRACKER
+	)
+	default boolean pointsTrackerShowUniqueChance()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "pointsTrackerShowPetChance",
+		name = "Show Pet %",
+		description = "Show pet chance on the overlay.",
+		position = 3,
+		section = SECTION_POINTS_TRACKER
+	)
+	default boolean pointsTrackerShowPetChance()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "pointsTrackerPostRaidMessage",
+		name = "Points Total Message",
+		description = "Show the total points in chat after the raid, akin to the Chambers of Xeric.",
+		position = 4,
+		section = SECTION_POINTS_TRACKER
+	)
+	default boolean pointsTrackerPostRaidMessage()
+	{
+		return true;
+	}
+
+	// Time Tracking
+
+	@ConfigItem(
+		keyName = "targetTimeDisplay",
+		name = "Target Time in Timer",
+		description = "Expand the in-raid timer to also show the target time to beat.",
+		position = 0,
+		section = SECTION_TIME_TRACKING
+	)
+	default boolean targetTimeDisplay()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "splitsMessage",
+		name = "Splits Post-Raid Message",
+		description = "Show room splits in a chat message at the end of the raid. Path shows boss completion times, room shows each individual room (can be very long).",
+		position = 1,
+		section = SECTION_TIME_TRACKING
+	)
+	default SplitsMode splitsMessage()
+	{
+		return SplitsMode.OFF;
+	}
+
+	@ConfigItem(
+		keyName = "splitsOverlay",
+		name = "Splits Overlay",
+		description = "Show room splits in an on-screen overlay. Path shows boss completion times, room shows each individual room (can be very long).",
+		position = 2,
+		section = SECTION_TIME_TRACKING
+	)
+	default SplitsMode splitsOverlay()
+	{
+		return SplitsMode.OFF;
+	}
 }

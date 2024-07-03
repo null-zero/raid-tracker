@@ -1,9 +1,16 @@
 package com.raidtracker;
-
+import com.raidtracker.ToAPointsTracker.util.RaidRoom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import net.runelite.client.plugins.loottracker.LootReceived;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Inject;
+import com.raidtracker.ToAPointsTracker.module.ToAPointsTrackerModule;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import com.raidtracker.ui.RaidTrackerPanel;
+import com.raidtracker.ToAPointsTracker.module.ComponentManager;
+import com.raidtracker.ToAPointsTracker.features.pointstracker.PointsTracker;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -43,6 +50,16 @@ public class RaidTrackerPlugin extends Plugin
 {
 	private static final String LEVEL_COMPLETE_MESSAGE = "complete! Duration:";
 	private static final String RAID_COMPLETE_MESSAGE = "Congratulations - your raid is complete!";
+	private static final String RAID_COMPLETE_MESSAGE_TOA = "Challenge complete: The Wardens.";
+
+	private static final String TOA_ROOM_COMPLETE_PREFIX = "Challenge complete";
+	private static final Pattern TOA_ROOM_COMPLETE_PATTERN =
+		Pattern.compile("Challenge complete: (?:Path of )?([A-Za-z-]+).*Total:.*?([0-9]+:[.0-9]+).*");
+	private static final Pattern TOA_WARDENS_COMPLETE_PATTERN =
+		Pattern.compile("Challenge complete: The (Wardens).*?completion time:.*?([0-9]+:[.0-9]+).*");
+	private static final Pattern TOA_COMPLETION_PATTERN = Pattern.compile("Tombs of Amascut (.*) Mode challenge completion time:.*?([0-9]+:[.0-9]+).*");
+	private static final Pattern TOA_TOTAL_COMPLETION_PATTERN = Pattern.compile("Tombs of Amascut (.*) Mode total challenge completion time:.*?([0-9]+:[.0-9]+).*");
+
 	private static final String DUST_RECIPIENTS = "Dust recipients: ";
 	private static final String TWISTED_KIT_RECIPIENTS = "Twisted Kit recipients: ";
 
@@ -66,6 +83,9 @@ public class RaidTrackerPlugin extends Plugin
 	@Inject
 	private RaidTracker raidTracker;
 
+	@Inject
+	private PointsTracker pointsTracker;
+
 	private static final WorldPoint TEMP_LOCATION = new WorldPoint(3360, 5152, 2);
 
 	@Setter
@@ -82,9 +102,20 @@ public class RaidTrackerPlugin extends Plugin
 	{
 		return configManager.getConfig(RaidTrackerConfig.class);
 	}
+	private ComponentManager componentManager = null;
 
 	@Override
+	public void configure(Binder binder)
+	{
+		binder.install(new ToAPointsTrackerModule());
+	}
+	@Override
 	protected void startUp() {
+		if (componentManager == null)
+		{
+			componentManager = injector.getInstance(ComponentManager.class);
+		}
+		componentManager.onPluginStart();
 		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread, client);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel-icon.png");
@@ -122,6 +153,7 @@ public class RaidTrackerPlugin extends Plugin
 
 		boolean tempInRaid = client.getVarbitValue(Varbits.IN_RAID) == 1;
 		boolean tempInTob = client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1;
+		boolean tempInToa = client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0;
 
 		// if the player's raid state has changed
 		if (tempInRaid ^ raidTracker.isInRaidChambers()) {
@@ -150,6 +182,31 @@ public class RaidTrackerPlugin extends Plugin
 		if (tempInTob ^ raidTracker.isInTheatreOfBlood()) {
 			if (tempInTob && raidTracker.isLoggedIn()) {
 				checkTobPresence();
+			}
+			else if (raidTracker.isRaidComplete()) {
+				//not tested
+
+				if (writerStarted) {
+					return;
+				}
+
+				fw.writeToFile(raidTracker);
+
+				writerStarted = true;
+
+				SwingUtilities.invokeLater(() -> {
+					panel.addDrop(raidTracker);
+					reset();
+				});
+			}
+			else {
+				reset();
+			}
+		}
+
+		if (tempInToa ^ raidTracker.isInTombsOfAmascut()) {
+			if (tempInToa && raidTracker.isLoggedIn()) {
+				checkToaPresence();
 			}
 			else if (raidTracker.isRaidComplete()) {
 				//not tested
@@ -317,6 +374,31 @@ public class RaidTrackerPlugin extends Plugin
 				});
 
 				break;
+
+			case (InterfaceID.TOA_REWARD):
+				if (raidTracker.isChestOpened() || !raidTracker.isRaidComplete()) {
+					return;
+				}
+
+				raidTracker.setChestOpened(true);
+
+				rewardItemContainer = client.getItemContainer(InventoryID.TOA_REWARD_CHEST);
+
+				if (rewardItemContainer == null) {
+					return;
+				}
+
+				raidTracker.setLootList(lootListFactory(rewardItemContainer.getItems()));
+
+				fw.writeToFile(raidTracker);
+
+				writerStarted = true;
+
+				SwingUtilities.invokeLater(() -> {
+					panel.addDrop(raidTracker);
+					reset();
+				});
+				break;
 		}
 	}
 
@@ -350,7 +432,7 @@ public class RaidTrackerPlugin extends Plugin
 			playerName = client.getLocalPlayer().getName();
 		}
 
-		if ((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood()) &&
+		if ((raidTracker.isInRaidChambers() || raidTracker.isInTheatreOfBlood() || raidTracker.isInTombsOfAmascut()) &&
 			(event.getType() == ChatMessageType.FRIENDSCHATNOTIFICATION || event.getType() == ChatMessageType.GAMEMESSAGE)) {
 			//unescape java to avoid unicode
 			String message = unescapeJavaString(Text.removeTags(event.getMessage()));
@@ -414,15 +496,20 @@ public class RaidTrackerPlugin extends Plugin
 
 			}
 
-			if (message.startsWith(RAID_COMPLETE_MESSAGE)) {
-				raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
-
-				raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
-
-				raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
-
-				raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
-
+			if (message.startsWith(RAID_COMPLETE_MESSAGE) || message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
+				// Toa points aren't held in varbits, use PointsTracker points instead, otherwise raid will fail to be logged
+				// For whatever reason RAID_PARTY_SIZE varbit doesn't track for ToA
+				if (message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
+					raidTracker.setTotalPoints(pointsTracker.getTotalPoints());
+					raidTracker.setPersonalPoints(pointsTracker.getPersonalTotalPoints());
+					raidTracker.setRaidLevel(client.getVarbitValue(Varbits.TOA_RAID_LEVEL));
+					raidTracker.setTeamSize((int) client.getLocalPlayer().getWorldView().players().stream().count());
+				} else
+				{
+					raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
+					raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
+					raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
+				}
 				raidTracker.setRaidComplete(true);
 
 				raidTracker.setDate(System.currentTimeMillis());
@@ -479,6 +566,50 @@ public class RaidTrackerPlugin extends Plugin
 				}
 			}
 
+
+			if (message.startsWith(TOA_ROOM_COMPLETE_PREFIX)) {
+				Matcher m;
+				if ((m = TOA_WARDENS_COMPLETE_PATTERN.matcher(message)).matches() ||
+					(m = TOA_ROOM_COMPLETE_PATTERN.matcher(message)).matches()) {
+					RaidRoom room = RaidRoom.forString(m.group(1));
+					String split = m.group(2);
+					if (room == null)
+					{
+						log.warn("Failed to find room {} for completion string {}", m.group(1), event.getMessage());
+						return;
+					}
+
+					switch (room)
+					{
+						case BABA:
+							raidTracker.setBabaTime(stringTimeToSeconds(split));
+							break;
+						case KEPHRI:
+							raidTracker.setKephriTime(stringTimeToSeconds(split));
+							break;
+						case AKKHA:
+							raidTracker.setAkkhaTime(stringTimeToSeconds(split));
+							break;
+						case ZEBAK:
+							raidTracker.setZebakTime(stringTimeToSeconds(split));
+							break;
+						case WARDENS:
+							raidTracker.setWardensTime(stringTimeToSeconds(split));
+							break;
+						default:
+					}
+				}
+
+				if ((m = TOA_COMPLETION_PATTERN.matcher(message)).matches()) {
+					String split = m.group(2);
+					raidTracker.setToaCompTime(stringTimeToSeconds(split));
+				}
+				if ((m = TOA_TOTAL_COMPLETION_PATTERN.matcher(message)).matches()) {
+					String split = m.group(2);
+					raidTracker.setRaidTime(stringTimeToSeconds(split));
+				}
+			}
+
 			//only special loot contain the "-" (except for the raid complete message)
 			if (raidTracker.isRaidComplete() && message.contains("-") && !message.startsWith(RAID_COMPLETE_MESSAGE)) {
 				//in case of multiple purples, a new purple is stored on a new line in the file, so a new raidtracker object will be used and written to the file
@@ -513,7 +644,7 @@ public class RaidTrackerPlugin extends Plugin
 			}
 
 			//for tob it works a bit different, not possible to get duplicates. - not tested in game yet.
-			if (raidTracker.isRaidComplete() && message.toLowerCase().contains("found something special") && !message.toLowerCase().contains("lil' zik")) {
+			if (raidTracker.isRaidComplete() && message.toLowerCase().contains("found something special") && !message.toLowerCase().contains("lil' zik") && !message.toLowerCase().contains("tumeken's guardian")) {
 				raidTracker.setSpecialLootReceiver(message.split(" found something special: ")[0]);
 				raidTracker.setSpecialLoot(message.split(" found something special: ")[1]);
 
@@ -559,7 +690,7 @@ public class RaidTrackerPlugin extends Plugin
 				}
 			}
 
-			if (raidTracker.isRaidComplete() && (message.toLowerCase().contains("olmlet") || message.toLowerCase().contains("lil' zik")) || message.toLowerCase().contains("would have been followed")) {
+			if (raidTracker.isRaidComplete() && (message.toLowerCase().contains("olmlet") || message.toLowerCase().contains("lil' zik") || message.toLowerCase().contains("tumeken's guardian")) || message.toLowerCase().contains("would have been followed")) {
 				boolean inOwnName = false;
 				boolean duplicate = message.toLowerCase().contains("would have been followed");
 
@@ -653,6 +784,15 @@ public class RaidTrackerPlugin extends Plugin
 		}
 		//1 = in party outside, 2 = spectating, 3 = dead spectating
 		raidTracker.setInTheatreOfBlood(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 1);
+	}
+
+	private void checkToaPresence()
+	{
+		if (client.getGameState() != GameState.LOGGED_IN) {
+			return;
+		}
+
+		raidTracker.setInTombsOfAmascut(client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0);
 	}
 
 	private int stringTimeToSeconds(String s)

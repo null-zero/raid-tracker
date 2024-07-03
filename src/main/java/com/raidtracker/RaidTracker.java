@@ -14,6 +14,8 @@ public class RaidTracker {
     boolean challengeMode = false;
     boolean inRaidChambers = false;
     boolean inTheatreOfBlood = false;
+	boolean inTombsOfAmascut = false;
+	int raidLevel = -1;
     boolean FreeForAll = false;
 
     int upperTime = -1;
@@ -71,6 +73,13 @@ public class RaidTracker {
     int tobPlayer3DeathCount = 0;
     int tobPlayer4DeathCount = 0;
     int tobPlayer5DeathCount = 0;
+
+	int babaTime = -1;
+	int kephriTime = -1;
+	int akkhaTime = -1;
+	int zebakTime = -1;
+	int wardensTime = -1;
+	int toaCompTime = -1;
 
     //Every RaidTracker has a unique uniqueID but not necessarily a unique killCountID, if there are multiple drops.
     String uniqueID = UUID.randomUUID().toString();

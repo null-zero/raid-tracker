@@ -7,7 +7,9 @@ import com.raidtracker.ui.RaidTrackerPanel;
 import junit.framework.TestCase;
 import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ClientToolbar;
 import net.runelite.http.api.item.ItemPrice;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
-import org.mockito.ArgumentMatchers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +106,14 @@ public class RaidTrackerTest extends TestCase
 	@Mock
 	@Bind
 	private ItemManager itemManager;
+
+	@Mock
+	@Bind
+	private ConfigManager configManager;
+
+	@Mock
+	@Bind
+	private ClientToolbar clientToolbar;
 
 	@Mock
 	@Bind
@@ -198,6 +207,37 @@ public class RaidTrackerTest extends TestCase
 		assertEquals("K1NG DK", raidTracker.getSpecialLootReceiver());
 		assertEquals("Kodai insignia", raidTracker.getSpecialLoot());
 		assertEquals(505050, raidTracker.getSpecialLootValue());
+	}
+
+	@Test
+	public void TestToaPurple()
+	{
+		RaidTracker raidTracker = new RaidTracker();
+		raidTracker.setRaidComplete(true);
+		raidTracker.setInTombsOfAmascut(true);
+
+		List<ItemPrice> lightbearerTestList = new ArrayList<>();
+
+		ItemPrice lightbearerTest = new ItemPrice();
+
+		lightbearerTest.setId(0);
+		lightbearerTest.setName("Lightbearer");
+		lightbearerTest.setPrice(50505050);
+
+		lightbearerTestList.add(lightbearerTest);
+
+		when(itemManager.search(anyString())).thenReturn(lightbearerTestList);
+
+		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Canvasba found something special: Lightbearer", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Canvasba found something special: Tumeken\\u0027s guardian", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals("Canvasba", raidTracker.getSpecialLootReceiver());
+		assertEquals("Lightbearer", raidTracker.getSpecialLoot());
+		assertFalse(raidTracker.petReceiver.isEmpty());
+		assertEquals(50505050, raidTracker.getSpecialLootValue());
 	}
 
 	@Test
