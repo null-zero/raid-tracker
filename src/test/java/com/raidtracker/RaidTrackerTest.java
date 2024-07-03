@@ -29,7 +29,6 @@ import static org.mockito.Mockito.*;
 public class RaidTrackerTest extends TestCase
 {
 
-
 	@Test
 	public void TestLootSplits() {
 		//TODO: double purples
@@ -119,10 +118,8 @@ public class RaidTrackerTest extends TestCase
 	@Bind
 	private RaidTrackerConfig raidTrackerConfig;
 
-
 	@Inject
 	private RaidTrackerPlugin raidTrackerPlugin;
-
 
 	@Before
 	public void setUp()
@@ -152,10 +149,10 @@ public class RaidTrackerTest extends TestCase
 		raidTracker.setInRaidChambers(true);
 		raidTracker.setRaidComplete(true);
 
-		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Congratulations - your raid is complete! Team size: Solo Duration: 1:40:26 Personal best: 31:12", "", 0);
+		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Congratulations - your raid is complete! Team size: Solo Duration: 40:26 Personal best: 31:12", "", 0);
 		raidTrackerPlugin.checkChatMessage(message, raidTracker);
 
-		assertEquals(6026, raidTracker.getRaidTime());
+		assertEquals(2426, raidTracker.getRaidTime());
 
 		message.setMessage("Congratulations - your raid is complete! Team size: 11-15 Players Duration: 50:26.6 Personal best: 31:12");
 		raidTrackerPlugin.checkChatMessage(message, raidTracker);
