@@ -764,8 +764,4 @@ public class RaidTrackerPlugin extends Plugin
 	public void setFw(FileReadWriter fw) {
 		this.fw = fw;
 	}
-
-	public void setFw(FileReadWriter fw) {
-		this.fw = fw;
-	}
 }
