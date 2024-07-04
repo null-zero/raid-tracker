@@ -21,8 +21,13 @@ If you find any bugs or problems, feel free to add me on discord, and I'll accep
 
 ## Changelog:
 
+### v1.4.4
+- Move repository ownership from Canvasba to Raitab.
+- Hide dey0 time tracking setting because it was unused.
+- Housecleaning, version updates, spelling/grammar fixes.
+
 ### v1.4.3
-- Remove functionality for Beta Worlds as it doesn't necessarily make sense to track and was causing crashes.
+- Remove functionality for Beta Worlds as it doesn't necessarily make sense to track and was causing crashes. Thanks Indo!
 
 ### v1.4.2
 - Added dey0 time tracking to the raid_tracker_data.log file, toggleable in the settings. Adding these times to the ui are planned for the next version.
