@@ -27,7 +27,7 @@ dependencies {
 
 group = 'raidtracker'
 version = '1.4.4'
-sourceCompatibility = '1.8'
+sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'

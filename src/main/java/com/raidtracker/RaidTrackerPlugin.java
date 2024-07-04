@@ -66,12 +66,15 @@ public class RaidTrackerPlugin extends Plugin
 	@Inject
 	private RaidTrackerConfig config;
 
-
 	@Inject
 	private ItemManager itemManager;
 
 	@Inject
 	private RaidTracker raidTracker;
+
+	@Inject
+	private FileReadWriter fw;
+	private boolean writerStarted = false;
 
 	private static final WorldPoint TEMP_LOCATION = new WorldPoint(3360, 5152, 2);
 
@@ -79,10 +82,6 @@ public class RaidTrackerPlugin extends Plugin
 	private RaidTrackerPanel panel;
 	private NavigationButton navButton;
 
-	@Inject
-	private FileReadWriter fw;
-
-	private boolean writerStarted = false;
 
 	@Provides
 	RaidTrackerConfig provideConfig(ConfigManager configManager)
@@ -760,6 +759,10 @@ public class RaidTrackerPlugin extends Plugin
 			sb.append(ch);
 		}
 		return sb.toString();
+	}
+
+	public void setFw(FileReadWriter fw) {
+		this.fw = fw;
 	}
 
 	public void setFw(FileReadWriter fw) {

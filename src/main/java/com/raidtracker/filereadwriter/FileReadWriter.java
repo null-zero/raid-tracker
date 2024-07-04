@@ -216,8 +216,7 @@ public class FileReadWriter {
 
         if (isTob) {
             dir = tobDir;
-        }
-        else {
+        } else {
             dir = coxDir;
         }
 
