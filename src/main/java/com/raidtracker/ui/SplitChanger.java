@@ -5,13 +5,25 @@ import lombok.Getter;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.AsyncBufferedImage;
-import org.apache.commons.text.StringEscapeUtils;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
@@ -269,20 +281,15 @@ public class SplitChanger extends JPanel {
 
         if (date.equals(today)) {
             dateText = "today";
-        }
-        else if (date.equals(yesterday)) {
+        } else if (date.equals(yesterday)) {
             dateText = "yesterday";
-        }
-        else if (date.isAfter(lastWeek)) {
+        } else if (date.isAfter(lastWeek)) {
             dateText = "last week";
-        }
-        else if (date.isAfter(lastMonth)) {
+        } else if (date.isAfter(lastMonth)) {
             dateText = "last month";
-        }
-        else if (date.isAfter(lastYear)) {
-            dateText = "last year";
-        }
-        else {
+        } else if (date.isAfter(lastYear)) {
+            dateText = "last year"; //todo ???
+        } else {
             dateText = "a long time ago";
         }
 
@@ -333,7 +340,6 @@ public class SplitChanger extends JPanel {
                 return -5;
             }
 
-
             String substr = s.substring(0, s.length() - 1);
 
             if (isNumeric(substr)) {
@@ -366,7 +372,7 @@ public class SplitChanger extends JPanel {
     private RaidUniques getByName(String name) {
         EnumSet<RaidUniques> uniquesList = getUniquesList();
         for (RaidUniques unique: uniquesList) {
-            if (unique.getName().toLowerCase().equals(name.toLowerCase())) {
+            if (unique.getName().equalsIgnoreCase(name)) {
                 return unique;
             }
         }
@@ -414,7 +420,6 @@ public class SplitChanger extends JPanel {
                 }
                 switch (nextChar) {
                     case '\\':
-                        ch = '\\';
                         break;
                     case 'b':
                         ch = '\b';

@@ -1,11 +1,10 @@
 package com.raidtracker.filereadwriter;
 
-import com.google.gson.*;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.raidtracker.RaidTracker;
@@ -13,6 +12,13 @@ import com.raidtracker.RaidTrackerItem;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
 
@@ -35,27 +41,18 @@ public class FileReadWriter {
 
         if (raidTracker.isInTheatreOfBlood()) {
             dir = tobDir;
-        }
-        else {
+        } else {
             dir = coxDir;
         }
         try
         {
             log.info("writer started");
-
             //use json format so serializing and deserializing is easy
-//            Gson gson = this.clientGson.newBuilder().create();
-
             JsonParser parser = new JsonParser();
-
             String fileName = dir + "\\raid_tracker_data.log";
-
             FileWriter fw = new FileWriter(fileName,true); //the true will append the new data
-
             gson.toJson(parser.parse(getJSONString(raidTracker, gson, parser)), fw);
-
             fw.append("\n");
-
             fw.close();
         }
         catch(IOException ioe)
@@ -71,7 +68,7 @@ public class FileReadWriter {
 
         List<RaidTrackerItem> lootList = raidTracker.getLootList();
 
-        //------------------ temporary fix until i can get gson.tojson to work for arraylist<RaidTrackerItem> ---------
+        //------------------ temporary fix until I can get gson.tojson to work for arraylist<RaidTrackerItem> ---------
         JsonArray lootListToString = new JsonArray();
 
 
@@ -99,21 +96,18 @@ public class FileReadWriter {
 
         if (isTob) {
             dir = tobDir;
-        }
-        else {
+        } else {
             dir = coxDir;
         }
 
         String fileName;
         if (alternateFile.length() != 0) {
             fileName = alternateFile;
-        }
-        else {
+        } else {
             fileName = dir + "\\raid_tracker_data.log";
         }
 
         try {
-//            Gson gson = this.clientGson.newBuilder().create();
             JsonParser parser = new JsonParser();
 
             BufferedReader bufferedreader = new BufferedReader(new FileReader(fileName));
@@ -124,8 +118,7 @@ public class FileReadWriter {
                 try {
                     RaidTracker parsed = gson.fromJson(parser.parse(line), RaidTracker.class);
                     RTList.add(parsed);
-                }
-                catch (JsonSyntaxException e) {
+                } catch (JsonSyntaxException e) {
                     System.out.println("Bad line: " + line);
                 }
 
@@ -186,8 +179,6 @@ public class FileReadWriter {
             dir = coxDir;
         }
         try {
-//            Gson gson = this.clientGson.newBuilder().create();
-
             JsonParser parser = new JsonParser();
 
             String fileName = dir + "\\raid_tracker_data.log";
@@ -201,7 +192,7 @@ public class FileReadWriter {
                 }
                 else {
                     //bit of a wonky check, so try to avoid with lootsplitpaid if possible
-                    RT.setSpecialLootInOwnName(RT.getLootList().size() > 0 && RT.getLootList().get(0).getName().toLowerCase().equals(RT.getSpecialLoot().toLowerCase()));
+                    RT.setSpecialLootInOwnName(!RT.getLootList().isEmpty() && RT.getLootList().get(0).getName().equalsIgnoreCase(RT.getSpecialLoot()));
                 }
 
                 gson.toJson(parser.parse(getJSONString(RT, gson, parser)), fw);

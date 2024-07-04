@@ -6,7 +6,14 @@ import com.raidtracker.filereadwriter.FileReadWriter;
 import com.raidtracker.ui.RaidTrackerPanel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemComposition;
+import net.runelite.api.ItemContainer;
+import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
@@ -25,7 +32,7 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 import net.runelite.client.game.ItemManager;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -312,7 +319,7 @@ public class RaidTrackerPlugin extends Plugin
 					raidTracker.setTobPlayer5DeathCount(deathsPlayer5.get());
 
 					if (client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null) {
-						raidTracker.setMvpInOwnName(mvp.get().toLowerCase().equals(client.getLocalPlayer().getName().toLowerCase()));
+						raidTracker.setMvpInOwnName(mvp.get().equalsIgnoreCase(client.getLocalPlayer().getName()));
 					}
 				});
 
@@ -713,7 +720,6 @@ public class RaidTrackerPlugin extends Plugin
 				}
 				switch (nextChar) {
 					case '\\':
-						ch = '\\';
 						break;
 					case 'b':
 						ch = '\b';

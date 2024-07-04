@@ -21,6 +21,7 @@ public enum RaidUniques {
     DUST("Metamorphic Dust", ItemID.METAMORPHIC_DUST),
     TWISTED_KIT("Twisted Kit", ItemID.TWISTED_ANCESTRAL_COLOUR_KIT),
     OLMLET("Olmlet", ItemID.OLMLET),
+
     AVERNIC("Avernic defender hilt", ItemID.AVERNIC_DEFENDER_HILT),
     RAPIER("Ghrazi rapier", ItemID.GHRAZI_RAPIER),
     SANGSTAFF("Sanguinesti staff (uncharged)", ItemID.SANGUINESTI_STAFF_UNCHARGED),
@@ -28,7 +29,7 @@ public enum RaidUniques {
     JUSTI_CHESTGUARD("Justiciar chestguard", ItemID.JUSTICIAR_CHESTGUARD),
     JUSTI_LEGGUARDS("Justiciar legguards", ItemID.JUSTICIAR_LEGGUARDS),
     SCYTHE("Scythe of vitur (uncharged)", ItemID.SCYTHE_OF_VITUR_UNCHARGED),
-    LILZIK("Lil' Zik", 22473);
+    LILZIK("Lil' Zik", ItemID.LIL_ZIK);
 
     @Getter
     private final String name;

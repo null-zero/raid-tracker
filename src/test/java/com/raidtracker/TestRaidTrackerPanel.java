@@ -9,7 +9,6 @@ import com.raidtracker.ui.RaidTrackerPanel;
 import com.raidtracker.ui.RaidUniques;
 import junit.framework.TestCase;
 import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
 import net.runelite.client.game.ItemManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,8 +20,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutionException;
 
-import static org.mockito.Mockito.*;
-
+import static org.mockito.Answers.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestRaidTrackerPanel extends TestCase
