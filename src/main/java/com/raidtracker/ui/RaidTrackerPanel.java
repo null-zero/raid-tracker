@@ -316,17 +316,26 @@ public class RaidTrackerPanel extends PluginPanel {
     private JPanel getTitle() {
         final JPanel title = new JPanel();
         title.setBorder(new EmptyBorder(3, 0, 10, 0));
-        title.setLayout(new BoxLayout(title,BoxLayout.Y_AXIS));
+        title.setLayout(new BoxLayout(title, BoxLayout.Y_AXIS));
 
 
         final JPanel buttonWrapper = new JPanel();
-        buttonWrapper.setLayout(new GridLayout(0,2));
-        buttonWrapper.setBorder(new EmptyBorder(5,0,0,0));
+        buttonWrapper.setLayout(new GridLayout(0, 3));
+        buttonWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
 
         JPanel coxButtonWrapper = new JPanel();
         coxButtonWrapper.setLayout(new GridLayout(0, 1));
         JButton coxButton = new JButton();
-        coxButton.setText("Chambers of Xeric");
+
+		JPanel tobButtonWrapper = new JPanel();
+		tobButtonWrapper.setLayout(new GridLayout(0, 1));
+		JButton tobButton = new JButton();
+
+		JPanel toaButtonWrapper = new JPanel();
+		toaButtonWrapper.setLayout(new GridLayout(0, 1));
+		JButton toaButton = new JButton();
+
+        coxButton.setText("CoX");
         coxButton.setForeground(Color.white);
         coxButton.setFont(FontManager.getRunescapeSmallFont());
         coxButton.setContentAreaFilled(false);
@@ -350,20 +359,17 @@ public class RaidTrackerPanel extends PluginPanel {
 			}
         });
 
-        JPanel tobButtonWrapper = new JPanel();
-        tobButtonWrapper.setLayout(new GridLayout(0, 1));
-        JButton tobButton = new JButton();
-        tobButton.setText("Theatre of Blood");
+        tobButton.setText("ToB");
         tobButton.setForeground(Color.white);
         tobButton.setFont(FontManager.getRunescapeSmallFont());
         tobButton.setContentAreaFilled(false);
+		tobButton.setOpaque(false);
         tobButton.setFocusable(false);
         tobButton.setBorderPainted(false);
         tobButton.setBorder(new EmptyBorder(7, 0, 7, 0));
 
 		if (selectedRaidTab.equals(RaidType.TOB)) {
 			tobButtonWrapper.setBorder(new MatteBorder(1, 1, 0, 1, ColorScheme.LIGHT_GRAY_COLOR.darker()));
-			coxButton.setOpaque(false);
 		} else {
 			tobButtonWrapper.setBorder(new MatteBorder(0, 0, 1, 0, ColorScheme.LIGHT_GRAY_COLOR.darker()));
 		}
@@ -377,14 +383,40 @@ public class RaidTrackerPanel extends PluginPanel {
 			}
         });
 
+		toaButton.setText("ToA");
+		toaButton.setForeground(Color.white);
+		toaButton.setFont(FontManager.getRunescapeSmallFont());
+		toaButton.setContentAreaFilled(false);
+		toaButton.setOpaque(false);
+		toaButton.setFocusable(false);
+		toaButton.setBorderPainted(false);
+		toaButton.setBorder(new EmptyBorder(10, 0, 10, 0));
+
+		if (selectedRaidTab.equals(RaidType.TOA)){
+			toaButtonWrapper.setBorder(new MatteBorder(1, 1, 0, 1, ColorScheme.LIGHT_GRAY_COLOR.darker()));
+		} else {
+			toaButtonWrapper.setBorder(new MatteBorder(0, 0, 1, 0, ColorScheme.LIGHT_GRAY_COLOR.darker()));
+		}
+
+		toaButton.setFocusPainted(false);
+		toaButton.setToolTipText("Show Tombs of Amascut Loot");
+		toaButton.addActionListener(e -> {
+			if (!selectedRaidTab.equals(RaidType.TOA)) {
+				selectedRaidTab = RaidType.TOA;
+				updateView();
+			}
+		});
+
         coxButtonWrapper.add(coxButton);
         tobButtonWrapper.add(tobButton);
+		toaButtonWrapper.add(toaButton);
 
         buttonWrapper.add(coxButtonWrapper);
         buttonWrapper.add(tobButtonWrapper);
+		buttonWrapper.add(toaButtonWrapper);
 
         JPanel titleLabelWrapper = new JPanel();
-        JLabel titleLabel = new JLabel("COX and TOB Data Tracker");
+        JLabel titleLabel = new JLabel("Raid Data Tracker");
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setBorder(new CompoundBorder(
                 new MatteBorder(0, 0, 1, 0, ColorScheme.LIGHT_GRAY_COLOR.darker()),
@@ -464,6 +496,7 @@ public class RaidTrackerPanel extends PluginPanel {
                     break;
                 case "Olmlet":
                 case "Lil' Zik":
+				case "Tumeken's guardian":
                     l = filterPetReceivers();
                     l2 = filterOwnPets(l);
                     isPet = true;
