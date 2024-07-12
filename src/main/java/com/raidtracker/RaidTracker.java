@@ -36,6 +36,7 @@ public class RaidTracker {
     int tightropeTime = -1;
     int crabsTime = -1;
 
+	int raidLevel = -1;
     int totalPoints = -1;
     int personalPoints = -1;
     int teamSize = -1;
