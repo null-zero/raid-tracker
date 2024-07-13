@@ -95,6 +95,8 @@ public class RaidTrackerPanel extends PluginPanel {
     private String cmFilter = "CM & Normal";
     @Setter
     private String mvpFilter = "Both";
+	@Setter
+	private String raidLevelFilter = "All Levels";
     @Setter
     private String teamSizeFilter = "All sizes";
 
@@ -901,6 +903,18 @@ public class RaidTrackerPanel extends PluginPanel {
             }
         });
 
+		JComboBox<String> raidLevel = new JComboBox<>(new String []{"All Levels", "Entry Mode", "Normal Mode", "Expert Mode"});
+		raidLevel.setFocusable(false);
+		raidLevel.setPreferredSize(new Dimension(110,25));
+		raidLevel.setSelectedItem(raidLevelFilter);
+
+		raidLevel.addActionListener(e -> {
+			raidLevelFilter = raidLevel.getSelectedItem().toString();
+			if (loaded) {
+				updateView();
+			}
+		});
+
         JComboBox<String> teamSize;
 
 		switch (selectedRaidTab) {
@@ -908,6 +922,8 @@ public class RaidTrackerPanel extends PluginPanel {
 				teamSize = new JComboBox<>(new String []{"All sizes", "Solo", "Duo", "Trio", "4-man", "5-man"});
 				break;
 			case TOA:
+				teamSize = new JComboBox<>(new String[]{"All sizes", "Solo", "Duo", "Trio", "4-man", "5-man", "6-man", "7-man", "8-man"});
+				break;
 			case COX:
 			default:
 				teamSize = new JComboBox<>(new String []{"All sizes", "Solo", "Duo", "Trio", "4-man", "5-man", "6-man", "7-man", "8-10 Players", "11-14 Players", "15-24 Players", "24+ Players"});
@@ -939,6 +955,7 @@ public class RaidTrackerPanel extends PluginPanel {
 				wrapper.add(mvp, c);
 				break;
 			case TOA:
+				wrapper.add(raidLevel, c);
 				break;
 			case COX:
 			default:
@@ -1441,7 +1458,19 @@ public class RaidTrackerPanel extends PluginPanel {
 				}
 				break;
 			case TOA:
-				tempRTList = toaRTList;
+				if (raidLevelFilter.equals("All Levels")) {
+					tempRTList = toaRTList;
+				} else if (raidLevelFilter.equals("Entry Mode"))
+				{
+					tempRTList = toaRTList.stream().filter(RT -> RT.getRaidLevel() < 150)
+						.collect(Collectors.toCollection(ArrayList::new));
+				} else if (raidLevelFilter.equals("Normal Mode")) {
+					tempRTList = toaRTList.stream().filter(RT -> RT.getRaidLevel() >= 150 && RT.getRaidLevel() < 300)
+						.collect(Collectors.toCollection(ArrayList::new));
+				} else {
+					tempRTList = toaRTList.stream().filter(RT -> RT.getRaidLevel() >= 300)
+						.collect(Collectors.toCollection(ArrayList::new));
+				}
 				break;
 			case COX:
 			default:
@@ -1485,6 +1514,10 @@ public class RaidTrackerPanel extends PluginPanel {
                 tempRTList = tempRTList.stream().filter(RT -> (RT.getTeamSize() == 7))
                         .collect(Collectors.toCollection(ArrayList::new));
                 break;
+			case "8-man":
+				tempRTList = tempRTList.stream().filter(RT -> (RT.getTeamSize() == 8))
+					.collect(Collectors.toCollection(ArrayList::new));
+				break;
             case "8-10 Players":
                 tempRTList = tempRTList.stream().filter(RT -> (RT.getTeamSize() >= 8 && RT.getTeamSize() <= 10))
                         .collect(Collectors.toCollection(ArrayList::new));
