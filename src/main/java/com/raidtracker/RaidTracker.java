@@ -75,6 +75,25 @@ public class RaidTracker {
     int tobPlayer4DeathCount = 0;
     int tobPlayer5DeathCount = 0;
 
+	String toaPlayer1 = "";
+	String toaPlayer2 = "";
+	String toaPlayer3 = "";
+	String toaPlayer4 = "";
+	String toaPlayer5 = "";
+	String toaPlayer6 = "";
+	String toaPlayer7 = "";
+	String toaPlayer8 = "";
+
+	int toaPlayer1DeathCount = 0;
+	int toaPlayer2DeathCount = 0;
+	int toaPlayer4DeathCount = 0;
+	int toaPlayer5DeathCount = 0;
+	int toaPlayer6DeathCount = 0;
+	int toaPlayer7DeathCount = 0;
+	int toaPlayer3DeathCount = 0;
+	int toaPlayer8DeathCount = 0;
+
+
     //Every RaidTracker has a unique uniqueID but not necessarily a unique killCountID, if there are multiple drops.
     String uniqueID = UUID.randomUUID().toString();
     String killCountID = UUID.randomUUID().toString();
