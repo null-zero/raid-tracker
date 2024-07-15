@@ -5,6 +5,8 @@ import com.google.inject.Inject;
 import com.raidtracker.filereadwriter.FileReadWriter;
 import com.raidtracker.ui.RaidTrackerPanel;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
@@ -57,6 +59,8 @@ public class RaidTrackerPlugin extends Plugin
 	private static final String DUST_RECIPIENTS = "Dust recipients: ";
 	private static final String TWISTED_KIT_RECIPIENTS = "Twisted Kit recipients: ";
 
+	private static final Pattern TOA_ROOM_COMPLETE_PATTERN = Pattern.compile("Challenge complete: ([A-Za-z- ]+).*Duration:.*?([0-9]+:[0-9]+\\.?[0-9]+)(?:\\. )?.*");
+	private static final Pattern TOA_COMPLETION_PATTERN = Pattern.compile(".*Tombs of Amascut: (.*) Mode (total|challenge) completion time:.*?([0-9]+:[.0-9]+)\\..*");
 
 	@Inject
 	private Client client;
@@ -618,6 +622,65 @@ public class RaidTrackerPlugin extends Plugin
 					case("the final challenge"):
 						raidTracker.setVerzikTime(stringTimeToSeconds(message.toLowerCase().split("duration: ")[1].split("theatre")[0]));
 						break;
+				}
+			}
+
+			if (message.contains("Challenge complete") || message.contains("total completion")) {
+
+				Matcher m;
+				if ((m = TOA_ROOM_COMPLETE_PATTERN.matcher(message)).matches())
+				{
+					String room = m.group(1).toLowerCase();
+					int duration = stringTimeToSeconds(m.group(2));
+					if (room == null || room.isEmpty())
+					{
+						log.warn("Failed to find room {} for completion string {}", m.group(1), event.getMessage());
+						return;
+					}
+
+					switch (room)
+					{
+						case "path of crondis":
+							raidTracker.setCrondisTime(duration);
+							break;
+						case "zebak":
+							raidTracker.setZebakTime(duration);
+							break;
+						case "path of apmeken":
+							raidTracker.setApmekenTime(duration);
+							break;
+						case "ba-ba":
+							raidTracker.setBabaTime(duration);
+							break;
+						case "path of scabaras":
+							raidTracker.setScabarasTime(duration);
+							break;
+						case "kephri":
+							raidTracker.setKephriTime(duration);
+							break;
+						case "path of het":
+							raidTracker.setHetTime(duration);
+							break;
+						case "akkha":
+							raidTracker.setAkkhaTime(duration);
+							break;
+						case "the wardens":
+							raidTracker.setWardensTime(duration);
+							break;
+					}
+				}
+
+				if ((m = TOA_COMPLETION_PATTERN.matcher(message)).matches())
+				{
+					int duration = stringTimeToSeconds(m.group(3));
+					if (Objects.equals(m.group(2), "challenge"))
+					{
+						raidTracker.setToaCompTime(duration);
+					}
+					if (Objects.equals(m.group(2), "total"))
+					{
+						raidTracker.setRaidTime(duration);
+					}
 				}
 			}
 

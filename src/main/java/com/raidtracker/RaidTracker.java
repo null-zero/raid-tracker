@@ -75,6 +75,17 @@ public class RaidTracker {
     int tobPlayer4DeathCount = 0;
     int tobPlayer5DeathCount = 0;
 
+	int apmekenTime = -1;
+	int babaTime = -1;
+	int scabarasTime = -1;
+	int kephriTime = -1;
+	int hetTime = -1;
+	int akkhaTime = -1;
+	int crondisTime = -1;
+	int zebakTime = -1;
+	int wardensTime = -1;
+	int toaCompTime = -1;
+
 	String toaPlayer1 = "";
 	String toaPlayer2 = "";
 	String toaPlayer3 = "";
