@@ -1073,13 +1073,21 @@ public class RaidTrackerPanel extends PluginPanel {
 
             title.add(textLabel);
 
-            JPanel timeTable = new JPanel();
-            timeTable.setLayout(new GridLayout(0, 2));
-            timeTable.setBorder(new EmptyBorder(5,3,1,3));
-            timeTable.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			wrapper.add(title);
+
+			JPanel timeTableContainer = new JPanel();
+			timeTableContainer.setBorder(new EmptyBorder(1, 7, 5, 7));
+			timeTableContainer.setLayout(new GridLayout(0, 1));
+			timeTableContainer.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+			JPanel timeTable = new JPanel();
+			JPanel timeTableFourCol = new JPanel();
 
 			switch(selectedRaidTab) {
 				case TOB:
+					timeTable.setLayout(new GridLayout(0, 2));
+					timeTable.setBorder(new EmptyBorder(5,3,1,3));
+					timeTable.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 					timeTable.add(textPanel("Maiden Time", 0));
 					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getMaidenTime() > 0).min(comparing(RaidTracker::getMaidenTime)).orElse(new RaidTracker()).getMaidenTime()), 1));
 					timeTable.add(textPanel("Bloat Time", 0));
@@ -1094,9 +1102,56 @@ public class RaidTrackerPanel extends PluginPanel {
 					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getVerzikTime() > 0).min(comparing(RaidTracker::getVerzikTime)).orElse(new RaidTracker()).getVerzikTime()), 1));
 					break;
 				case TOA:
+					timeTableFourCol.setLayout(new GridLayout(0, 4));
+					timeTableFourCol.setBorder(new EmptyBorder(5,0,0,0));
+					timeTableFourCol.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+					timeTableFourCol.add(textPanel("", 0));
+					timeTableFourCol.add(textPanel("Puzzle", 0));
+					timeTableFourCol.add(textPanel("Boss", 0));
+					timeTableFourCol.add(textPanel("Path", 1));
+					timeTableContainer.add(timeTableFourCol);
+
+					timeTableFourCol = stripedPanel(true);
+					timeTableFourCol.add(textPanel("Ba-Ba", 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getApmekenTime() > 0).min(comparing(RaidTracker::getApmekenTime)).orElse(new RaidTracker()).getApmekenTime()), 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getBabaTime() > 0).min(comparing(RaidTracker::getBabaTime)).orElse(new RaidTracker()).getBabaTime()), 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getApmekenTime() > 0 && RT.getBabaTime() > 0).mapToInt(RT -> RT.getApmekenTime() + RT.getBabaTime()).reduce(Math::min).orElse(0)), 3));
+					timeTableContainer.add(timeTableFourCol);
+
+					timeTableFourCol = stripedPanel(false);
+					timeTableFourCol.add(textPanel("Kephri", 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getScabarasTime() > 0).min(comparing(RaidTracker::getScabarasTime)).orElse(new RaidTracker()).getScabarasTime()), 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getKephriTime() > 0).min(comparing(RaidTracker::getKephriTime)).orElse(new RaidTracker()).getKephriTime()), 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getScabarasTime() > 0 && RT.getKephriTime() > 0).mapToInt(RT -> RT.getScabarasTime() + RT.getKephriTime()).reduce(Math::min).orElse(0)), 3));
+					timeTableContainer.add(timeTableFourCol);
+
+					timeTableFourCol = stripedPanel(true);
+					timeTableFourCol.add(textPanel("Akkha", 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getHetTime() > 0).min(comparing(RaidTracker::getHetTime)).orElse(new RaidTracker()).getHetTime()), 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getAkkhaTime() > 0).min(comparing(RaidTracker::getAkkhaTime)).orElse(new RaidTracker()).getAkkhaTime()), 2));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getHetTime() > 0 && RT.getAkkhaTime() > 0).mapToInt(RT -> RT.getHetTime() + RT.getAkkhaTime()).reduce(Math::min).orElse(0)), 3));
+					timeTableContainer.add(timeTableFourCol);
+
+					timeTableFourCol = stripedPanel(false);
+					timeTableFourCol.add(textPanel("Zebak", 4));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getCrondisTime() > 0).min(comparing(RaidTracker::getCrondisTime)).orElse(new RaidTracker()).getCrondisTime()), 4));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getZebakTime() > 0).min(comparing(RaidTracker::getZebakTime)).orElse(new RaidTracker()).getZebakTime()), 4));
+					timeTableFourCol.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getCrondisTime() > 0 && RT.getZebakTime() > 0).mapToInt(RT -> RT.getCrondisTime() + RT.getZebakTime()).reduce(Math::min).orElse(0)), 5));
+					timeTableContainer.add(timeTableFourCol);
+
+					timeTable = new JPanel();
+					timeTable.setLayout(new GridLayout(0, 2));
+					timeTable.setBackground(ColorScheme.DARK_GRAY_COLOR);
+					timeTable.add(textPanel("Completion Time", 4));
+					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getToaCompTime() > 0).min(comparing(RaidTracker::getToaCompTime)).orElse(new RaidTracker()).getToaCompTime()), 5));
+					timeTableContainer.add(timeTable);
 					break;
 				case COX:
 				default:
+					timeTable.setLayout(new GridLayout(0, 2));
+					timeTable.setBorder(new EmptyBorder(5,3,1,3));
+					timeTable.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
 					timeTable.add(textPanel("Upper Level", 0));
 					timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getUpperTime() > 0).min(comparing(RaidTracker::getUpperTime)).orElse(new RaidTracker()).getUpperTime()), 1));
 
@@ -1119,13 +1174,24 @@ public class RaidTrackerPanel extends PluginPanel {
 						.orElse(new RaidTracker());
 
 					timeTable.add(textPanel(secondsToMinuteString(olmTimeRT.getRaidTime() - olmTimeRT.getLowerTime()), 1));
+					wrapper.add(timeTable);
 			}
 
-            timeTable.add(textPanel("Overall Time", 2));
-            timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getRaidTime() > 0).min(comparing(RaidTracker::getRaidTime)).orElse(new RaidTracker()).getRaidTime()), 3));
+			timeTable = new JPanel();
+			timeTable.setLayout(new GridLayout(0, 2));
+			timeTable.setBorder(new EmptyBorder(0,3,0,3));
+			timeTable.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-            wrapper.add(title);
-            wrapper.add(timeTable);
+			if (selectedRaidTab == RaidType.TOA) {
+				timeTable.add(textPanel("Overall Time", 7));
+				timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getRaidTime() > 0).min(comparing(RaidTracker::getRaidTime)).orElse(new RaidTracker()).getRaidTime()), 6));
+				timeTableContainer.add(timeTable);
+				wrapper.add(timeTableContainer);
+			} else {
+				timeTable.add(textPanel("Overall Time", 2));
+				timeTable.add(textPanel(secondsToMinuteString(getFilteredRTList().stream().filter(RT -> RT.getRaidTime() > 0).min(comparing(RaidTracker::getRaidTime)).orElse(new RaidTracker()).getRaidTime()), 3));
+				wrapper.add(timeTable);
+			}
         }
 
         return wrapper;
@@ -1167,12 +1233,42 @@ public class RaidTrackerPanel extends PluginPanel {
         else if (borderOptions == 2) {
             label.setBorder(new MatteBorder(0,0,0,1,ColorScheme.LIGHT_GRAY_COLOR.darker()));
         }
-        else {
+		else if (borderOptions == 3) {
+			label.setBorder(new CompoundBorder(
+				new MatteBorder(0,0,0,0,ColorScheme.LIGHT_GRAY_COLOR.darker()),
+				new EmptyBorder(5,3,5,3)));
+		}  else if (borderOptions == 4) {
+			label.setBorder(new MatteBorder(0,0,1,1,ColorScheme.LIGHT_GRAY_COLOR.darker()));
+		} else if (borderOptions == 5) {
+			label.setBorder(new CompoundBorder(
+				new MatteBorder(0, 0, 1, 0, ColorScheme.LIGHT_GRAY_COLOR.darker()),
+				new EmptyBorder(5, 3, 5, 3)));
+		} else if (borderOptions == 6) {
+			label.setBorder(new CompoundBorder(
+				new MatteBorder(0,0,0,0,ColorScheme.LIGHT_GRAY_COLOR.darker()),
+				new EmptyBorder(5,3,0,3)));
+		}  else if (borderOptions == 7) {
+			label.setBorder(new CompoundBorder(
+				new MatteBorder(0,0,0,1,ColorScheme.LIGHT_GRAY_COLOR.darker()),
+				new EmptyBorder(5,3,0,3)));
+		} else {
             label.setBorder(new MatteBorder(0,0,0,0,ColorScheme.LIGHT_GRAY_COLOR.darker()));
         }
 
         return label;
     }
+
+	public JPanel stripedPanel(boolean striped) {
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridLayout(0, 4));
+
+		if (striped) {
+			panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		} else {
+			panel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		}
+		return panel;
+	}
 
     public BufferedImage resizeImage(BufferedImage before, double scale, int af) {
         int w = before.getWidth();
