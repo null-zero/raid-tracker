@@ -137,6 +137,7 @@ public class PointsTracker implements PluginLifecycleComponent
 	private int nonPartyPoints; // points that are earned once by the entire party
 	private final List<Integer> seenMvpItems = new ArrayList<>(4);
 
+	@Getter
 	private int teamSize;
 	private int raidLevel;
 	private int wardenDowns;

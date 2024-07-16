@@ -7,7 +7,7 @@ import net.runelite.client.party.messages.PartyMemberMessage;
 
 @RequiredArgsConstructor
 @Getter
-public class PointsMessage extends PartyMemberMessage
+public class RaidTrackerPointsMessage extends PartyMemberMessage
 {
 
 	@SerializedName("p")

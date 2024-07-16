@@ -1,5 +1,6 @@
 package com.raidtracker;
 
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Inject;
 import com.raidtracker.filereadwriter.FileReadWriter;
@@ -36,6 +37,9 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 import net.runelite.client.game.ItemManager;
 import net.runelite.api.widgets.WidgetUtil;
+import com.raidtracker.toapointstracker.pointstracker.PointsTracker;
+import com.raidtracker.toapointstracker.module.ComponentManager;
+import com.raidtracker.toapointstracker.module.TombsOfAmascutModule;
 
 import javax.swing.SwingUtilities;
 import java.awt.image.BufferedImage;
@@ -82,6 +86,11 @@ public class RaidTrackerPlugin extends Plugin
 	private RaidTracker raidTracker;
 
 	@Inject
+	private PointsTracker pointsTracker;
+
+	private ComponentManager componentManager = null;
+
+	@Inject
 	private FileReadWriter fw;
 	private boolean writerStarted = false;
 	private boolean raidStarted = false;
@@ -100,6 +109,12 @@ public class RaidTrackerPlugin extends Plugin
 	}
 
 	@Override
+	public void configure(Binder binder)
+	{
+		binder.install(new TombsOfAmascutModule());
+	}
+
+	@Override
 	protected void startUp() {
 		panel = new RaidTrackerPanel(itemManager, fw, config, clientThread, client);
 
@@ -114,6 +129,11 @@ public class RaidTrackerPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
+		if (componentManager == null)
+		{
+			componentManager = injector.getInstance(ComponentManager.class);
+		}
+		componentManager.onPluginStart();
 
 		if (client.getGameState().equals(GameState.LOGGED_IN) || client.getGameState().equals(GameState.LOADING))
 		{
@@ -296,15 +316,7 @@ public class RaidTrackerPlugin extends Plugin
 		if (raidTracker.isInTombsOfAmascut() && client.getWidget(WIDGET_TIMER) != null) {
 			if (!Objects.equals(Objects.requireNonNull(client.getWidget(WIDGET_TIMER)).getText(), "00:00") && !Objects.equals(Objects.requireNonNull(client.getWidget(WIDGET_TIMER)).getText(), "0:00.00") && !raidStarted) {
 				raidStarted = true;
-
-				int teamSize = 0;
-				for (int i = Varbits.TOA_MEMBER_0_HEALTH; i <= Varbits.TOA_MEMBER_7_HEALTH; i++) {
-					if (client.getVarbitValue(i) != 0) {
-						teamSize++;
-					}
-				}
-
-				raidTracker.setTeamSize(teamSize);
+				raidTracker.setTeamSize(pointsTracker.getTeamSize());
 				raidTracker.setRaidLevel(client.getVarbitValue(Varbits.TOA_RAID_LEVEL));
 			}
 		}
@@ -542,6 +554,8 @@ public class RaidTrackerPlugin extends Plugin
 			if (message.startsWith(RAID_COMPLETE_MESSAGE_COX_TOB) || message.startsWith(RAID_COMPLETE_MESSAGE_TOA)) {
 
 				if (raidTracker.isInRaidChambers()) {
+					raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
+					raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
 					raidTracker.setTeamSize(client.getVarbitValue(Varbits.RAID_PARTY_SIZE));
 				} else if (raidTracker.isInTombsOfAmascut()) {
 					int MAX_RAIDERS = 8;
@@ -580,11 +594,11 @@ public class RaidTrackerPlugin extends Plugin
 							}
 						}
 					}
+
+					raidTracker.setTotalPoints(pointsTracker.getTotalPoints());
+					raidTracker.setPersonalPoints(pointsTracker.getPersonalTotalPoints());
 				}
 
-				raidTracker.setTotalPoints(client.getVarbitValue(Varbits.TOTAL_POINTS));
-
-				raidTracker.setPersonalPoints(client.getVarbitValue(Varbits.PERSONAL_POINTS));
 
 				raidTracker.setPercentage(raidTracker.getPersonalPoints() / (raidTracker.getTotalPoints() / 100.0));
 

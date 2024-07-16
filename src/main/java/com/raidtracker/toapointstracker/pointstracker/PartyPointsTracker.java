@@ -46,7 +46,7 @@ public class PartyPointsTracker implements PluginLifecycleComponent
 	@Override
 	public void startUp()
 	{
-		wsClient.registerMessage(PointsMessage.class);
+		wsClient.registerMessage(RaidTrackerPointsMessage.class);
 		eventBus.register(this);
 		this.clearPartyPointsMap();
 	}
@@ -54,12 +54,12 @@ public class PartyPointsTracker implements PluginLifecycleComponent
 	@Override
 	public void shutDown()
 	{
-		wsClient.unregisterMessage(PointsMessage.class);
+		wsClient.unregisterMessage(RaidTrackerPointsMessage.class);
 		eventBus.unregister(this);
 	}
 
 	@Subscribe
-	public void onPointsMessage(PointsMessage e)
+	public void onRaidTrackerPointsMessage(RaidTrackerPointsMessage e)
 	{
 		partyPoints.put(e.getMemberId(), e.getPoints());
 	}
@@ -110,7 +110,7 @@ public class PartyPointsTracker implements PluginLifecycleComponent
 			return;
 		}
 
-		PointsMessage message = new PointsMessage(points);
+		RaidTrackerPointsMessage message = new RaidTrackerPointsMessage(points);
 		partyService.send(message);
 		partyDontSendUntil = System.currentTimeMillis() + (30 * 1000);
 	}

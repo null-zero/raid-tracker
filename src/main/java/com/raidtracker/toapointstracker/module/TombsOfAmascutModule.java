@@ -24,11 +24,4 @@ public class TombsOfAmascutModule extends AbstractModule
 		lifecycleComponents.addBinding().to(RaidStateTracker.class);
 	}
 
-	@Provides
-	@Singleton
-	RaidTrackerConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(RaidTrackerConfig.class);
-	}
-
 }
