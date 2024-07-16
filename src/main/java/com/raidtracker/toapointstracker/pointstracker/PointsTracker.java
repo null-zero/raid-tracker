@@ -1,11 +1,11 @@
-package com.duckblade.osrs.toa.features.pointstracker;
+package com.raidtracker.toapointstracker.pointstracker;
 
-import com.duckblade.osrs.toa.TombsOfAmascutConfig;
-import com.duckblade.osrs.toa.module.PluginLifecycleComponent;
-import com.duckblade.osrs.toa.util.RaidRoom;
-import com.duckblade.osrs.toa.util.RaidState;
-import com.duckblade.osrs.toa.util.RaidStateChanged;
-import com.duckblade.osrs.toa.util.RaidStateTracker;
+import com.raidtracker.RaidTrackerConfig;
+import com.raidtracker.toapointstracker.module.PluginLifecycleComponent;
+import com.raidtracker.toapointstracker.util.RaidRoom;
+import com.raidtracker.toapointstracker.util.RaidState;
+import com.raidtracker.toapointstracker.util.RaidStateChanged;
+import com.raidtracker.toapointstracker.util.RaidStateTracker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.awt.Color;
@@ -46,9 +46,6 @@ public class PointsTracker implements PluginLifecycleComponent
 	 * When dying, you preserve the room points amount toward cap, but subtract 20% from total.
 	 * There is no special behaviour when wiping a room; the 20% points lost is intended to account for that.
 	 */
-
-	static final NumberFormat POINTS_FORMAT = NumberFormat.getInstance();
-	static final NumberFormat PERCENT_FORMAT = new DecimalFormat("#.##%");
 
 	private static final String START_MESSAGE = "You enter the Tombs of Amascut";
 	private static final String DEATH_MESSAGE = "You have died";
@@ -130,7 +127,7 @@ public class PointsTracker implements PluginLifecycleComponent
 
 	private final EventBus eventBus;
 	private final Client client;
-	private final TombsOfAmascutConfig config;
+	private final RaidTrackerConfig config;
 	private final PartyPointsTracker partyPointsTracker;
 	private final RaidStateTracker raidStateTracker;
 
@@ -145,7 +142,7 @@ public class PointsTracker implements PluginLifecycleComponent
 	private int wardenDowns;
 
 	@Override
-	public boolean isEnabled(TombsOfAmascutConfig config, RaidState raidState)
+	public boolean isEnabled(RaidTrackerConfig config, RaidState raidState)
 	{
 		// always track even if not displaying, so that party members get points totals
 		return raidState.isInRaid();
@@ -183,10 +180,6 @@ public class PointsTracker implements PluginLifecycleComponent
 		switch (e.getPreviousState().getCurrentRoom())
 		{
 			case TOMB:
-				if (config.pointsTrackerPostRaidMessage())
-				{
-					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", buildPointsMessage(), "", false);
-				}
 				break;
 
 			// puzzle estimates
@@ -331,16 +324,6 @@ public class PointsTracker implements PluginLifecycleComponent
 		return getPersonalTotalPoints() + nonPartyPoints;
 	}
 
-	public double getUniqueChance()
-	{
-		return UniqueChanceCalculator.getUniqueChance(raidLevel, getTotalPoints());
-	}
-
-	public double getPetChance()
-	{
-		return UniqueChanceCalculator.getPetChance(raidLevel, getTotalPoints());
-	}
-
 	private void reset()
 	{
 		this.personalTotalPoints = BASE_POINTS;
@@ -366,19 +349,6 @@ public class PointsTracker implements PluginLifecycleComponent
 		{
 			partyPointsTracker.schedulePointsUpdate(points);
 		}
-	}
-
-	private String buildPointsMessage()
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("Total points: ");
-		sb.append(ColorUtil.wrapWithColorTag(POINTS_FORMAT.format(getTotalPoints()), Color.red));
-		sb.append(", Personal points: ");
-		sb.append(ColorUtil.wrapWithColorTag(POINTS_FORMAT.format(getPersonalTotalPoints()), Color.red));
-		sb.append(" (");
-		sb.append(ColorUtil.wrapWithColorTag(PERCENT_FORMAT.format(getPersonalPercent()), Color.red));
-		sb.append(")");
-		return sb.toString();
 	}
 
 }

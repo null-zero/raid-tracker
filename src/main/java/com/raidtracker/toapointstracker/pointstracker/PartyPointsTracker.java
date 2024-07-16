@@ -1,8 +1,8 @@
-package com.duckblade.osrs.toa.features.pointstracker;
+package com.raidtracker.toapointstracker.pointstracker;
 
-import com.duckblade.osrs.toa.TombsOfAmascutConfig;
-import com.duckblade.osrs.toa.module.PluginLifecycleComponent;
-import com.duckblade.osrs.toa.util.RaidState;
+import com.raidtracker.RaidTrackerConfig;
+import com.raidtracker.toapointstracker.module.PluginLifecycleComponent;
+import com.raidtracker.toapointstracker.util.RaidState;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,7 +37,7 @@ public class PartyPointsTracker implements PluginLifecycleComponent
 	private long partyDontSendUntil = -1;
 
 	@Override
-	public boolean isEnabled(TombsOfAmascutConfig config, RaidState raidState)
+	public boolean isEnabled(RaidTrackerConfig config, RaidState raidState)
 	{
 		// always track even if not displaying, so that party members get points totals
 		return raidState.isInRaid();

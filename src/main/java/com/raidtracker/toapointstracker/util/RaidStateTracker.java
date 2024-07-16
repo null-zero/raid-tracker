@@ -1,6 +1,6 @@
-package com.duckblade.osrs.toa.util;
+package com.raidtracker.toapointstracker.util;
 
-import com.duckblade.osrs.toa.module.PluginLifecycleComponent;
+import com.raidtracker.toapointstracker.module.PluginLifecycleComponent;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;

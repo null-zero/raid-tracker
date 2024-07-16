@@ -1,4 +1,4 @@
-package com.duckblade.osrs.toa.util;
+package com.raidtracker.toapointstracker.util;
 
 import lombok.Value;
 

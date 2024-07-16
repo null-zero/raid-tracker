@@ -1,4 +1,4 @@
-package com.duckblade.osrs.toa.features.pointstracker;
+package com.raidtracker.toapointstracker.pointstracker;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;

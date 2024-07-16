@@ -1,9 +1,9 @@
-package com.duckblade.osrs.toa.module;
+package com.raidtracker.toapointstracker.module;
 
-import com.duckblade.osrs.toa.TombsOfAmascutConfig;
-import com.duckblade.osrs.toa.util.RaidState;
-import com.duckblade.osrs.toa.util.RaidStateChanged;
-import com.duckblade.osrs.toa.util.RaidStateTracker;
+import com.raidtracker.RaidTrackerConfig;
+import com.raidtracker.toapointstracker.util.RaidState;
+import com.raidtracker.toapointstracker.util.RaidStateChanged;
+import com.raidtracker.toapointstracker.util.RaidStateTracker;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class ComponentManager
 
 	private final EventBus eventBus;
 	private final GameEventManager gameEventManager;
-	private final TombsOfAmascutConfig config;
+	private final RaidTrackerConfig config;
 	private final RaidStateTracker raidStateTracker;
 	private final Set<PluginLifecycleComponent> components;
 
@@ -54,11 +54,6 @@ public class ComponentManager
 	@Subscribe
 	public void onConfigChanged(ConfigChanged e)
 	{
-		if (!TombsOfAmascutConfig.CONFIG_GROUP.equals(e.getGroup()))
-		{
-			return;
-		}
-
 		revalidateComponentStates();
 	}
 
