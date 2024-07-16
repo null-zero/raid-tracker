@@ -12,6 +12,7 @@ import net.runelite.api.ItemComposition;
 import net.runelite.api.Player;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ClientToolbar;
 import net.runelite.http.api.item.ItemPrice;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,6 +111,10 @@ public class RaidTrackerTest extends TestCase
 	@Mock
 	@Bind
 	private ItemManager itemManager;
+
+	@Mock
+	@Bind
+	private ClientToolbar clientToolbar;
 
 	@Mock
 	@Bind
