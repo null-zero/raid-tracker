@@ -46,6 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Float.parseFloat;
+import net.runelite.http.api.item.ItemPrice;
 
 @Slf4j
 @PluginDescriptor(
@@ -721,7 +722,7 @@ public class RaidTrackerPlugin extends Plugin
 					altRT.setSpecialLootInOwnName(altRT.getSpecialLootReceiver().toLowerCase().trim().equals(playerName.toLowerCase().trim()));
 
 
-					altRT.setSpecialLootValue(itemManager.search(raidTracker.getSpecialLoot()).get(0).getPrice());
+					altRT.setSpecialLootValue(getItemPrice(itemManager.search(raidTracker.getSpecialLoot()).get(0)));
 
 					setSplits(altRT);
 
@@ -733,7 +734,7 @@ public class RaidTrackerPlugin extends Plugin
 					raidTracker.setSpecialLootReceiver(message.split(" - ")[0]);
 					raidTracker.setSpecialLoot(message.split(" - ")[1]);
 
-					raidTracker.setSpecialLootValue(itemManager.search(raidTracker.getSpecialLoot()).get(0).getPrice());
+					raidTracker.setSpecialLootValue(getItemPrice(itemManager.search(raidTracker.getSpecialLoot()).get(0)));
 
 					raidTracker.setSpecialLootInOwnName(raidTracker.getSpecialLootReceiver().toLowerCase().trim().equals(playerName.toLowerCase().trim()));
 
@@ -748,7 +749,7 @@ public class RaidTrackerPlugin extends Plugin
 				raidTracker.setSpecialLootReceiver(message.split(" found something special: ")[0]);
 				raidTracker.setSpecialLoot(message.split(" found something special: ")[1]);
 
-				raidTracker.setSpecialLootValue(itemManager.search(raidTracker.getSpecialLoot()).get(0).getPrice());
+				raidTracker.setSpecialLootValue(getItemPrice(itemManager.search(raidTracker.getSpecialLoot()).get(0)));
 
 				raidTracker.setSpecialLootInOwnName(raidTracker.getSpecialLootReceiver().toLowerCase().trim().equals(playerName.toLowerCase().trim()));
 
@@ -862,7 +863,7 @@ public class RaidTrackerPlugin extends Plugin
 							name = comp.getName();
 							id = comp.getId();
 							quantity = item.getQuantity();
-							price = comp.getPrice() * quantity;
+							price = getItemPrice(id) * quantity;
 						}
 					});
 				});
@@ -994,6 +995,13 @@ public class RaidTrackerPlugin extends Plugin
 			sb.append(ch);
 		}
 		return sb.toString();
+	}
+
+	public int getItemPrice(ItemPrice itemPrice) {
+		return itemPrice.getWikiPrice() > 0 ? itemPrice.getWikiPrice() : itemPrice.getPrice();
+	}
+	public int getItemPrice(int itemID) {
+		return itemManager.getItemPrice(itemID) > 0 ? itemManager.getItemPrice(itemID) : itemManager.getItemComposition(itemID).getPrice();
 	}
 
 	public void setFw(FileReadWriter fw) {
