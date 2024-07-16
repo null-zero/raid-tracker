@@ -147,7 +147,7 @@ public class RaidTrackerTest extends TestCase
 	}
 
 	@Test
-	public void TestDuration()
+	public void TestCoxDuration()
 	{
 		RaidTracker raidTracker = new RaidTracker();
 		raidTracker.setInRaidChambers(true);
@@ -180,6 +180,31 @@ public class RaidTrackerTest extends TestCase
 
 		assertEquals(199, raidTracker.getVanguardsTime());
 
+
+	}
+
+	@Test
+	public void TestToaDuration()
+	{
+		RaidTracker raidTracker = new RaidTracker();
+		raidTracker.setInTombsOfAmascut(true);
+		raidTracker.setRaidComplete(true);
+
+		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Challenge complete: Path of Crondis. Duration: 0:34.20. Total: 0:34.20", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals(34, raidTracker.getCrondisTime());
+
+		message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Challenge complete: The Wardens. Duration: 10:15.60Tombs of Amascut: Expert Mode challenge completion time: 34:07.20. Personal best: 28:16.20", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals(616, raidTracker.getWardensTime());
+		assertEquals(2047, raidTracker.getToaCompTime());
+
+		message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Tombs of Amascut: Expert Mode total completion time: 36:51.00. Personal best: 30:57.00", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals(2211, raidTracker.getRaidTime());
 
 	}
 
@@ -239,6 +264,37 @@ public class RaidTrackerTest extends TestCase
 		assertEquals("Avernic defender hilt", raidTracker.getSpecialLoot());
 		assertFalse(raidTracker.petReceiver.isEmpty());
 		assertEquals("Canvasba", raidTracker.getPetReceiver());
+		assertEquals(50505050, raidTracker.getSpecialLootValue());
+	}
+
+	@Test
+	public void TestToaPurple()
+	{
+		RaidTracker raidTracker = new RaidTracker();
+		raidTracker.setRaidComplete(true);
+		raidTracker.setInTombsOfAmascut(true);
+
+		List<ItemPrice> lightbearerTestList = new ArrayList<>();
+
+		ItemPrice lightbearerTest = new ItemPrice();
+
+		lightbearerTest.setId(0);
+		lightbearerTest.setName("Lightbearer");
+		lightbearerTest.setPrice(50505050);
+
+		lightbearerTestList.add(lightbearerTest);
+
+		when(itemManager.search(anyString())).thenReturn(lightbearerTestList);
+
+		ChatMessage message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Canvasba found something special: Lightbearer", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		message  = new ChatMessage(null, ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Canvasba found something special: Tumeken\\u0027s guardian", "", 0);
+		raidTrackerPlugin.checkChatMessage(message, raidTracker);
+
+		assertEquals("Canvasba", raidTracker.getSpecialLootReceiver());
+		assertEquals("Lightbearer", raidTracker.getSpecialLoot());
+		assertFalse(raidTracker.petReceiver.isEmpty());
 		assertEquals(50505050, raidTracker.getSpecialLootValue());
 	}
 
