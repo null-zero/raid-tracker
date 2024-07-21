@@ -797,7 +797,7 @@ public class RaidTrackerPanel extends PluginPanel {
 						toaUUIDMap.put(tempRaidTracker.getUniqueID(), tempRaidTracker);
 					});
 					toaRTList = new ArrayList<>(toaUUIDMap.values());
-					fw.updateRTList(toaRTList);
+					fw.updateRTList(toaRTList, RaidType.TOA);
 					break;
 				case COX:
 				default:
@@ -806,7 +806,7 @@ public class RaidTrackerPanel extends PluginPanel {
 						coxUUIDMap.put(tempRaidTracker.getUniqueID(), tempRaidTracker);
 					});
 					coxRTList = new ArrayList<>(coxUUIDMap.values());
-					fw.updateRTList(coxRTList);
+					fw.updateRTList(coxRTList, RaidType.COX);
 			}
 
             updateView();

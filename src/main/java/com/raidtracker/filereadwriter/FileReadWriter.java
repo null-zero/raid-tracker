@@ -45,8 +45,11 @@ public class FileReadWriter {
 			dir = tobDir;
 		} else if (raidTracker.isInTombsOfAmascut()) {
 			dir = toaDir;
+		} else if (raidTracker.isInRaidChambers()) {
+			dir = coxDir;
 		} else {
 			dir = coxDir;
+			log.warn("writeToFile called without an inRaid flag set.", new IllegalStateException());
 		}
 
 		try
@@ -203,10 +206,6 @@ public class FileReadWriter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void updateRTList(ArrayList<RaidTracker> RTList) {
-		updateRTList(RTList, RaidType.COX);
 	}
 
 	public boolean delete(RaidType raidType) {
